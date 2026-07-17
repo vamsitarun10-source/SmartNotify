@@ -95,3 +95,11 @@ To learn more about React Native, take a look at the following resources:
 - [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
 - [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+
+## Build the standalone APK (Android Studio)
+
+- In the project root run `npm install` (if peer-dependency errors occur, use `npm install --legacy-peer-deps`).
+- Open Android Studio → "Open" → select `C:\SmartNotify\ClassReminder\android`. Let it sync Gradle.
+- Menu: Build → Generate Signed Bundle / APK → choose APK → Create new keystore (set password + alias) → finish. Output: `android\app\build\outputs\apk\release\app-release.apk`.
+- Transfer that APK to your phone and install it (or connect a USB phone/emulator and run `npx react-native run-android`).
+- IMPORTANT: the app's API URL is hardcoded in `config.ts` as `http://192.168.1.100:8000`. For a physical phone it MUST be your computer's actual LAN IP on the same Wi-Fi. Edit `config.ts` and rebuild if it changes. Also run the backend (`uvicorn main:app --host 0.0.0.0 --port 8000`) and allow port 8000 through Windows Firewall.
