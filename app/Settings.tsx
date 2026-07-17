@@ -168,7 +168,7 @@ export default function SettingsScreen() {
           <TouchableOpacity style={row(t)} onPress={() => navigation.navigate("About")} activeOpacity={0.7}>
             <View style={{ flex: 1 }}>
               <Text style={label(t)}>About</Text>
-              <Text style={sublabel(t)}>ClassReminder v1.0.0</Text>
+              <Text style={sublabel(t)}>SmartNotify v1.0.0</Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color={t.textTertiary} />
           </TouchableOpacity>

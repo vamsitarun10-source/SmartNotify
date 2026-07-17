@@ -1,5 +1,5 @@
-// ClassReminder App Info — Version, Policy, Config
-export const APP_NAME = "ClassReminder";
+// SmartNotify App Info — Version, Policy, Config
+export const APP_NAME = "SmartNotify";
 export const APP_VERSION = "1.0.0";
 export const APP_BUILD = "1";
 export const APP_PACKAGE = "com.classreminder";
@@ -14,13 +14,13 @@ CLASSREMINDER PRIVACY POLICY
 Last updated: July 16, 2026
 
 1. INFORMATION WE COLLECT
-ClassReminder collects only the information you provide directly:
+SMARTNOTIFY collects only the information you provide directly:
 - Account information (name, email)
 - Class schedules, tasks, assignments, exams, and notes you create
 - App usage preferences (theme, notification settings)
 
 2. HOW WE USE YOUR INFORMATION
-We use your data solely to provide the ClassReminder service:
+We use your data solely to provide the SmartNotify service:
 - Display your schedule and reminders
 - Send notification reminders
 - Power the AI scheduling assistant
@@ -45,7 +45,7 @@ We use your data solely to provide the ClassReminder service:
 - You can export your data before deletion (Backup feature)
 
 7. CHILDREN'S PRIVACY
-- ClassReminder is not directed at children under 13
+- SmartNotify is not directed at children under 13
 - We do not knowingly collect data from children
 
 8. CHANGES TO THIS POLICY
@@ -61,7 +61,7 @@ CLASSREMINDER TERMS OF SERVICE
 Last updated: July 16, 2026
 
 1. ACCEPTANCE
-By using ClassReminder, you agree to these terms.
+By using SmartNotify, you agree to these terms.
 
 2. USE OF SERVICE
 - You may use the app for personal educational scheduling

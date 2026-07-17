@@ -53,7 +53,7 @@ export default function BackupScreen() {
   };
 
   const onImport = () => {
-    Alert.alert("Import Data", "Paste your ClassReminder backup JSON below. This will merge with existing data.", [
+        Alert.alert("Import Data", "Paste your SmartNotify backup JSON below. This will merge with existing data.", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Import (Merge)",

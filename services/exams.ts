@@ -17,7 +17,7 @@ export interface Exam {
 
 export async function listExams(): Promise<Exam[]> {
   const { data } = await api.get<Exam[]>("/exams/");
-  return data;
+  return data || [];
 }
 
 export async function getUpcomingExams(): Promise<Exam[]> {

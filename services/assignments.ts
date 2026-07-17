@@ -16,7 +16,7 @@ export interface Assignment {
 
 export async function listAssignments(): Promise<Assignment[]> {
   const { data } = await api.get<Assignment[]>("/assignments/");
-  return data;
+  return data || [];
 }
 
 export async function getTodayAssignments(): Promise<Assignment[]> {

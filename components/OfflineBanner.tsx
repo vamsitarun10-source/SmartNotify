@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { View, Text, StyleSheet, Animated } from "react-native";
 import NetInfo from "@react-native-community/netinfo";
 import Ionicons from "react-native-vector-icons/Ionicons";

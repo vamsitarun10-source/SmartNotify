@@ -1,4 +1,4 @@
-import React, { useEffect, Suspense, lazy, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -19,39 +19,37 @@ import api from "./services/api";
 import OnboardingScreen, { isOnboardingComplete } from "./app/OnboardingScreen";
 import { incrementLaunchCount } from "./components/RateAppDialog";
 
-// Eager imports
+// Eager imports — React.lazy() is unreliable in React Native release builds
 import Login from "./app/Login";
 import Register from "./app/Register";
 import Home from "./app/Home";
-
-// Lazy imports
-const Calendar = lazy(() => import("./app/Calendar"));
-const Profile = lazy(() => import("./app/Profile"));
-const Tasks = lazy(() => import("./app/Tasks"));
-const Assignments = lazy(() => import("./app/Assignments"));
-const Exams = lazy(() => import("./app/Exams"));
-const Timetable = lazy(() => import("./app/Timetable"));
-const Attendance = lazy(() => import("./app/Attendance"));
-const Statistics = lazy(() => import("./app/Statistics"));
-const AddEvent = lazy(() => import("./app/AddEvent"));
-const EditEvent = lazy(() => import("./app/EditEvent"));
-const AddCalendarEvent = lazy(() => import("./app/AddCalendarEvent"));
-const AddTask = lazy(() => import("./app/AddTask"));
-const EditTask = lazy(() => import("./app/EditTask"));
-const AddAssignment = lazy(() => import("./app/AddAssignment"));
-const EditAssignment = lazy(() => import("./app/EditAssignment"));
-const AddExam = lazy(() => import("./app/AddExam"));
-const EditExam = lazy(() => import("./app/EditExam"));
-const Notes = lazy(() => import("./app/Notes"));
-const AddNote = lazy(() => import("./app/AddNote"));
-const EditNote = lazy(() => import("./app/EditNote"));
-const GlobalSearch = lazy(() => import("./app/GlobalSearch"));
-const Backup = lazy(() => import("./app/Backup"));
-const Settings = lazy(() => import("./app/Settings"));
-const Rewards = lazy(() => import("./app/Rewards"));
-const PrivacyPolicy = lazy(() => import("./app/PrivacyPolicy"));
-const About = lazy(() => import("./app/About"));
-const Feedback = lazy(() => import("./app/Feedback"));
+import Calendar from "./app/Calendar";
+import Profile from "./app/Profile";
+import Tasks from "./app/Tasks";
+import Assignments from "./app/Assignments";
+import Exams from "./app/Exams";
+import Timetable from "./app/Timetable";
+import Attendance from "./app/Attendance";
+import Statistics from "./app/Statistics";
+import AddEvent from "./app/AddEvent";
+import EditEvent from "./app/EditEvent";
+import AddCalendarEvent from "./app/AddCalendarEvent";
+import AddTask from "./app/AddTask";
+import EditTask from "./app/EditTask";
+import AddAssignment from "./app/AddAssignment";
+import EditAssignment from "./app/EditAssignment";
+import AddExam from "./app/AddExam";
+import EditExam from "./app/EditExam";
+import Notes from "./app/Notes";
+import AddNote from "./app/AddNote";
+import EditNote from "./app/EditNote";
+import GlobalSearch from "./app/GlobalSearch";
+import Backup from "./app/Backup";
+import Settings from "./app/Settings";
+import Rewards from "./app/Rewards";
+import PrivacyPolicy from "./app/PrivacyPolicy";
+import About from "./app/About";
+import Feedback from "./app/Feedback";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -68,7 +66,6 @@ function LoadingFallback() {
 function MainTabs() {
   const { theme: t } = useAppTheme();
   return (
-    <Suspense fallback={<LoadingFallback />}>
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
@@ -101,7 +98,6 @@ function MainTabs() {
         <Tab.Screen name="Statistics" component={Statistics} options={{ tabBarIcon: ({ color, size }) => <Ionicons name="stats-chart" color={color} size={22} /> }} />
         <Tab.Screen name="Rewards" component={Rewards} options={{ tabBarIcon: ({ color, size }) => <Ionicons name="trophy" color={color} size={22} /> }} />
       </Tab.Navigator>
-    </Suspense>
   );
 }
 
@@ -181,26 +177,24 @@ function AppContent() {
           ) : (
             <>
               <Stack.Screen name="Main" component={MainTabs} options={{ animation: "fade" }} />
-              <Suspense fallback={<LoadingFallback />}>
-                <Stack.Screen name="AddEvent" component={AddEvent} options={{ animation: "slide_from_bottom" }} />
-                <Stack.Screen name="EditEvent" component={EditEvent} options={{ animation: "slide_from_bottom" }} />
-                <Stack.Screen name="AddCalendarEvent" component={AddCalendarEvent} options={{ animation: "slide_from_bottom" }} />
-                <Stack.Screen name="AddTask" component={AddTask} options={{ animation: "slide_from_bottom" }} />
-                <Stack.Screen name="EditTask" component={EditTask} options={{ animation: "slide_from_bottom" }} />
-                <Stack.Screen name="AddAssignment" component={AddAssignment} options={{ animation: "slide_from_bottom" }} />
-                <Stack.Screen name="EditAssignment" component={EditAssignment} options={{ animation: "slide_from_bottom" }} />
-                <Stack.Screen name="AddExam" component={AddExam} options={{ animation: "slide_from_bottom" }} />
-                <Stack.Screen name="EditExam" component={EditExam} options={{ animation: "slide_from_bottom" }} />
-                <Stack.Screen name="Notes" component={Notes} options={{ animation: "slide_from_right" }} />
-                <Stack.Screen name="AddNote" component={AddNote} options={{ animation: "slide_from_bottom" }} />
-                <Stack.Screen name="EditNote" component={EditNote} options={{ animation: "slide_from_bottom" }} />
-                <Stack.Screen name="GlobalSearch" component={GlobalSearch} options={{ animation: "fade" }} />
-                <Stack.Screen name="Backup" component={Backup} options={{ animation: "slide_from_right" }} />
-                <Stack.Screen name="Settings" component={Settings} options={{ animation: "slide_from_right" }} />
-                <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} options={{ animation: "slide_from_right" }} />
-                <Stack.Screen name="About" component={About} options={{ animation: "slide_from_right" }} />
-                <Stack.Screen name="Feedback" component={Feedback} options={{ animation: "slide_from_right" }} />
-              </Suspense>
+              <Stack.Screen name="AddEvent" component={AddEvent} options={{ animation: "slide_from_bottom" }} />
+              <Stack.Screen name="EditEvent" component={EditEvent} options={{ animation: "slide_from_bottom" }} />
+              <Stack.Screen name="AddCalendarEvent" component={AddCalendarEvent} options={{ animation: "slide_from_bottom" }} />
+              <Stack.Screen name="AddTask" component={AddTask} options={{ animation: "slide_from_bottom" }} />
+              <Stack.Screen name="EditTask" component={EditTask} options={{ animation: "slide_from_bottom" }} />
+              <Stack.Screen name="AddAssignment" component={AddAssignment} options={{ animation: "slide_from_bottom" }} />
+              <Stack.Screen name="EditAssignment" component={EditAssignment} options={{ animation: "slide_from_bottom" }} />
+              <Stack.Screen name="AddExam" component={AddExam} options={{ animation: "slide_from_bottom" }} />
+              <Stack.Screen name="EditExam" component={EditExam} options={{ animation: "slide_from_bottom" }} />
+              <Stack.Screen name="Notes" component={Notes} options={{ animation: "slide_from_right" }} />
+              <Stack.Screen name="AddNote" component={AddNote} options={{ animation: "slide_from_bottom" }} />
+              <Stack.Screen name="EditNote" component={EditNote} options={{ animation: "slide_from_bottom" }} />
+              <Stack.Screen name="GlobalSearch" component={GlobalSearch} options={{ animation: "fade" }} />
+              <Stack.Screen name="Backup" component={Backup} options={{ animation: "slide_from_right" }} />
+              <Stack.Screen name="Settings" component={Settings} options={{ animation: "slide_from_right" }} />
+              <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} options={{ animation: "slide_from_right" }} />
+              <Stack.Screen name="About" component={About} options={{ animation: "slide_from_right" }} />
+              <Stack.Screen name="Feedback" component={Feedback} options={{ animation: "slide_from_right" }} />
             </>
           )}
         </Stack.Navigator>

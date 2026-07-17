@@ -144,7 +144,7 @@ export default function LoginScreen() {
           <View style={s.iconContainer}>
             <Ionicons name="school" size={48} color={t.primary} />
           </View>
-          <Text style={s.heading}>ClassReminder</Text>
+          <Text style={s.heading}>SmartNotify</Text>
           <Text style={s.sub}>Log in to manage your classes</Text>
 
           <View style={s.inputWrapper}>

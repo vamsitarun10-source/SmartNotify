@@ -55,7 +55,7 @@ export default function RateAppDialog() {
       <View style={styles.overlay}>
         <View style={[styles.dialog, { backgroundColor: t.card, borderColor: t.cardBorder }]}>
           <Ionicons name="star" size={48} color="#FFD700" />
-          <Text style={[styles.title, { color: t.text }]}>Enjoying ClassReminder?</Text>
+          <Text style={[styles.title, { color: t.text }]}>Enjoying SmartNotify?</Text>
           <Text style={[styles.message, { color: t.textSecondary }]}>If you're finding the app useful, please take a moment to rate us on the Play Store!</Text>
 
           <TouchableOpacity style={[styles.rateBtn, { backgroundColor: t.primary }]} onPress={onRate} activeOpacity={0.8}>

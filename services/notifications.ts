@@ -205,14 +205,13 @@ export async function scheduleClassNotification(
   const notificationId = await notifee.createTriggerNotification(
     {
       id: eventId,
-      title: "ClassReminder",
+      title: "SmartNotify",
       body: `${title} starts in ${reminderBefore} min`,
       android: buildAndroidConfig(CHANNEL_ID, [DISMISS_ACTION, SNOOZE_5_ACTION, ATTENDED_ACTION], true, data),
     },
     { type: "timestamp", timestamp: reminderDate.getTime() }
   );
 
-  const map = await getMap(NOTIFICATION_MAP_KEY);
   map[eventId] = notificationId;
   await saveMap(NOTIFICATION_MAP_KEY, map);
   return notificationId;

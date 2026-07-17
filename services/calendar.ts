@@ -11,7 +11,7 @@ export interface CalendarEvent {
 
 export async function listCalendarEvents(): Promise<CalendarEvent[]> {
   const { data } = await api.get<CalendarEvent[]>("/calendar/");
-  return data;
+  return data || [];
 }
 
 export async function createCalendarEvent(payload: CalendarEvent): Promise<CalendarEvent> {

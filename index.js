@@ -2,7 +2,7 @@ import { AppRegistry } from "react-native";
 import notifee, { EventType } from "@notifee/react-native";
 import App from "./App";
 
-AppRegistry.registerComponent("ClassReminder", () => App);
+AppRegistry.registerComponent("SmartNotify", () => App);
 
 // Background event handler — fires even when app is killed
 notifee.onBackgroundEvent(async ({ type, detail }) => {
@@ -13,7 +13,7 @@ notifee.onBackgroundEvent(async ({ type, detail }) => {
   if (type === EventType.PRESS) {
     // App opens — navigation handled by deep link
   } else if (type === EventType.ACTION_PRESS) {
-    const data = (detail.notification as any)?.data || (detail.notification as any)?.android?.data;
+    const data = (detail.notification && detail.notification.data) || (detail.notification && detail.notification.android && detail.notification.android.data);
 
     if (actionId === "dismiss") {
       await notifee.cancelNotification(notificationId);

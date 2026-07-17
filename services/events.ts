@@ -14,7 +14,7 @@ export interface ClassEvent {
 
 export async function listEvents(): Promise<ClassEvent[]> {
   const { data } = await api.get<ClassEvent[]>("/events");
-  return data;
+  return data || [];
 }
 
 export async function createEvent(payload: ClassEvent): Promise<ClassEvent> {
