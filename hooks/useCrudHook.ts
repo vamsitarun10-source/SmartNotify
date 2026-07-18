@@ -11,7 +11,7 @@ type CrudService<T> = {
   toggle?: (id: string) => Promise<T>;
 };
 
-export function createCrudHook<T extends { id?: string }>(service: CrudService<T>, cacheKey: string) {
+export function createCrudHook<T extends { id?: string }>(service: CrudService<T>, cacheKey: string, dataKey: string) {
   return function useCrud() {
     const [items, setItems] = useState<T[]>([]);
     const [loading, setLoading] = useState(false);
@@ -113,6 +113,6 @@ export function createCrudHook<T extends { id?: string }>(service: CrudService<T
       }
     }, [items, cacheKey]);
 
-    return { items, loading, error, pendingCount, refresh, create, update, remove, toggle };
+    return { [dataKey]: items, loading, error, pendingCount, refresh, create, update, remove, toggle };
   };
 }

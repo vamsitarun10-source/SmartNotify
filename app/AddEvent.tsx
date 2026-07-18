@@ -11,6 +11,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { useAppTheme } from "../constants/ThemeContext";
 import { useEvents } from "../hooks/useEvents";
@@ -24,6 +25,7 @@ function todayStr(): string {
 }
 
 export default function AddEventScreen() {
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { create } = useEvents();
   const { theme: t } = useAppTheme();
@@ -76,7 +78,7 @@ export default function AddEventScreen() {
 
   const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: t.background },
-    content: { flex: 1, padding: t.spacing.md },
+    content: { flex: 1, padding: t.spacing.md, paddingBottom: insets.bottom + 40 },
     field: { marginBottom: t.spacing.md },
     label: {
       fontSize: t.font.sm,
@@ -125,7 +127,7 @@ export default function AddEventScreen() {
   return (
     <KeyboardAvoidingView
       style={s.container}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : "padding"}
     >
       <Header title="Add class" showBack />
       <ScrollView style={s.content}>

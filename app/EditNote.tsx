@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
@@ -16,6 +17,7 @@ const NOTE_TYPES = [
 ];
 
 export default function EditNoteScreen() {
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const route = useRoute<any>();
   const id = route.params?.id;
@@ -66,7 +68,7 @@ export default function EditNoteScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: t.background }}>
       <Header title="Edit Note" showBack />
-      <ScrollView contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 90 }}>
+      <ScrollView contentContainerStyle={{ padding: t.spacing.md, paddingBottom: insets.bottom + 40 }}>
         <Field label="Title"><TextInput style={input(t)} value={title} onChangeText={setTitle} /></Field>
         <Field label="Subject"><TextInput style={input(t)} value={subject} onChangeText={setSubject} /></Field>
 

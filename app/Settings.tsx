@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, ScrollView, Switch, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
@@ -27,6 +28,7 @@ const NOTIF_STYLE_OPTIONS: { key: string; label: string }[] = [
 ];
 
 export default function SettingsScreen() {
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
   const { theme: t, mode, setMode, fontSize, setFontSize } = useAppTheme();
   const { settings, updateSetting } = useSettings();
@@ -40,7 +42,7 @@ export default function SettingsScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: t.background }}>
       <Header title="Settings" showBack />
-      <ScrollView contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 90 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 60 + insets.bottom + 16 }} showsVerticalScrollIndicator={false}>
 
         {/* APPEARANCE */}
         <SectionHeader t={t} icon="color-palette" title="Appearance" />

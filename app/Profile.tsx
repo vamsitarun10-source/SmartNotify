@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
@@ -14,6 +15,7 @@ import Header from "../components/Header";
 
 export default function ProfileScreen() {
   const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
   const { user, logout } = useAuth();
   const { theme: t } = useAppTheme();
 
@@ -33,7 +35,7 @@ export default function ProfileScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: t.background }}>
       <Header title="Profile" />
-      <View style={{ flex: 1, alignItems: "center", paddingTop: t.spacing.xl }}>
+      <View style={{ flex: 1, alignItems: "center", paddingTop: t.spacing.xl, paddingBottom: 60 + insets.bottom + 16 }}>
         <View style={{
           width: 96, height: 96, borderRadius: 48,
           backgroundColor: t.primaryContainer,

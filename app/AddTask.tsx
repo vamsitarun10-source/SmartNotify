@@ -9,6 +9,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
@@ -30,6 +31,7 @@ function todayStr(): string {
 }
 
 export default function AddTaskScreen() {
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { create } = useTasks();
   const { theme: t } = useAppTheme();
@@ -90,7 +92,7 @@ export default function AddTaskScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: t.background }}>
       <Header title="Add Task" showBack />
-      <ScrollView contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 90 }}>
+      <ScrollView contentContainerStyle={{ padding: t.spacing.md, paddingBottom: insets.bottom + 40 }}>
         <Field label="Title">
           <TextInput style={input(t)} value={title} onChangeText={setTitle} placeholder="e.g. Submit assignment" placeholderTextColor={t.textTertiary} />
         </Field>

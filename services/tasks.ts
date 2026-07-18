@@ -15,7 +15,7 @@ export interface Task {
 
 export async function listTasks(): Promise<Task[]> {
   const { data } = await api.get<Task[]>("/tasks/");
-  return data;
+  return data || [];
 }
 
 export async function getTodayTasks(): Promise<Task[]> {

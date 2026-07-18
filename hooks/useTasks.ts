@@ -18,7 +18,7 @@ const taskService = {
   toggle: apiToggle,
 };
 
-export const useTasks = createCrudHook<Task>(taskService, "cache_tasks");
+export const useTasks = createCrudHook<Task>(taskService, "cache_tasks", "tasks");
 
 export function useTodayTasks() {
   const [tasks, setTasks] = useState<Task[]>([]);

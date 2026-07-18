@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Keyboard,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
@@ -19,6 +20,7 @@ const TYPE_NAV: Record<string, { screen: string; param?: string }> = {
 
 export default function GlobalSearchScreen() {
   const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
   const { theme: t } = useAppTheme();
   const { results, loading, query, totalResults, search, clear } = useGlobalSearch();
   const inputRef = useRef<TextInput>(null);
@@ -36,7 +38,7 @@ export default function GlobalSearchScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: t.background }}>
       {/* Search Header */}
-      <View style={{ flexDirection: "row", alignItems: "center", gap: t.spacing.sm, paddingHorizontal: t.spacing.md, paddingTop: t.spacing.md, paddingBottom: t.spacing.sm, backgroundColor: t.surface, borderBottomWidth: 1, borderBottomColor: t.divider }}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: t.spacing.sm, paddingHorizontal: t.spacing.md, paddingTop: insets.top + t.spacing.sm, paddingBottom: t.spacing.sm, backgroundColor: t.surface, borderBottomWidth: 1, borderBottomColor: t.divider }}>
         <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
           <Ionicons name="arrow-back" size={24} color={t.text} />
         </TouchableOpacity>
@@ -60,7 +62,7 @@ export default function GlobalSearchScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 90 }}
+        contentContainerStyle={{ padding: t.spacing.md, paddingBottom: insets.bottom + 60 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >

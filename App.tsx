@@ -3,7 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { ActivityIndicator, StatusBar, View, StyleSheet } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { ThemeProvider, useAppTheme } from "./constants/ThemeContext";
 import { SettingsProvider } from "./constants/SettingsContext";
@@ -65,6 +65,7 @@ function LoadingFallback() {
 
 function MainTabs() {
   const { theme: t } = useAppTheme();
+  const insets = useSafeAreaInsets();
   return (
       <Tab.Navigator
         screenOptions={{
@@ -80,11 +81,12 @@ function MainTabs() {
             shadowOffset: { width: 0, height: -2 },
             shadowOpacity: 0.1,
             shadowRadius: 8,
-            height: 60,
-            paddingBottom: 8,
+            height: 60 + Math.max(insets.bottom, 4),
+            paddingBottom: 8 + insets.bottom,
             paddingTop: 6,
           },
           tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
+          tabBarItemStyle: { paddingVertical: 4 },
         }}
       >
         <Tab.Screen name="Home" component={Home} options={{ tabBarIcon: ({ color, size }) => <Ionicons name="school" color={color} size={22} /> }} />

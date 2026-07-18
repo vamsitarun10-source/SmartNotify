@@ -11,6 +11,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useAppTheme } from "../constants/ThemeContext";
 import { useEvents } from "../hooks/useEvents";
@@ -21,6 +22,7 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^\d{2}:\d{2}$/;
 
 export default function EditEventScreen() {
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const route = useRoute<any>();
   const id = route.params?.id;
@@ -92,7 +94,7 @@ export default function EditEventScreen() {
 
   const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: t.background },
-    content: { flex: 1, padding: t.spacing.md },
+    content: { flex: 1, padding: t.spacing.md, paddingBottom: insets.bottom + 40 },
     center: { flex: 1, alignItems: "center", justifyContent: "center" },
     empty: { color: t.textSecondary },
     field: { marginBottom: t.spacing.md },
@@ -154,7 +156,7 @@ export default function EditEventScreen() {
   return (
     <KeyboardAvoidingView
       style={s.container}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : "padding"}
     >
       <Header title="Edit class" showBack />
       <ScrollView style={s.content}>

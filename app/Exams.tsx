@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Alert, RefreshControl } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
@@ -39,6 +40,7 @@ function formatCountdown(dateStr: string, timeStr: string): string {
 
 export default function ExamsScreen() {
   const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
   const { exams, loading, refresh, remove, toggle } = useExams();
   const { theme: t } = useAppTheme();
   const [filter, setFilter] = useState<Filter>("all");
@@ -76,7 +78,7 @@ export default function ExamsScreen() {
       <Header title="Exams" showAdd onAdd={() => navigation.navigate("AddExam")} />
       <OfflineBanner />
       <ScrollView
-        contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 90 }}
+        contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 60 + insets.bottom + 16 }}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor={t.primary} />}
         showsVerticalScrollIndicator={false}
       >
@@ -173,6 +175,7 @@ export default function ExamsScreen() {
         onPress={() => navigation.navigate("AddExam")}
         backgroundColor={t.primary}
         entranceDelay={400}
+        style={{ position: 'absolute', right: 16, bottom: 60 + insets.bottom + 16, zIndex: 100 }}
         accessibilityLabel="Add new exam"
         accessibilityHint="Opens the add exam form"
         accessibilityRole="button"

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Alert, RefreshControl } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
@@ -19,6 +20,7 @@ const FILTERS: { key: Filter; label: string }[] = [
 
 export default function AssignmentsScreen() {
   const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
   const { assignments, loading, refresh, remove, toggle } = useAssignments();
   const { theme: t } = useAppTheme();
   const [filter, setFilter] = useState<Filter>("all");
@@ -46,7 +48,7 @@ export default function AssignmentsScreen() {
       <Header title="Assignments" showAdd onAdd={() => navigation.navigate("AddAssignment")} />
       <OfflineBanner />
       <ScrollView
-        contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 90 }}
+        contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 60 + insets.bottom + 16 }}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor={t.primary} />}
         showsVerticalScrollIndicator={false}
       >
@@ -134,6 +136,7 @@ export default function AssignmentsScreen() {
         onPress={() => navigation.navigate("AddAssignment")}
         backgroundColor={t.primary}
         entranceDelay={400}
+        style={{ position: 'absolute', right: 16, bottom: 60 + insets.bottom + 16, zIndex: 100 }}
         accessibilityLabel="Add new assignment"
         accessibilityHint="Opens the add assignment form"
         accessibilityRole="button"

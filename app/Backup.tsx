@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import {
   View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Share,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
@@ -15,6 +16,7 @@ import { listNotes } from "../services/notes";
 import Header from "../components/Header";
 
 export default function BackupScreen() {
+  const insets = useSafeAreaInsets();
   const { theme: t } = useAppTheme();
   const { loading, error, lastBackup, importResult, loadLastBackupTime, exportData, importData } = useBackup();
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -106,7 +108,7 @@ export default function BackupScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: t.background }}>
       <Header title="Backup & Restore" showBack />
-      <ScrollView contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 90 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 60 + insets.bottom + 16 }} showsVerticalScrollIndicator={false}>
         {error ? (
           <View style={[card(t), { borderColor: t.danger, borderLeftWidth: 4 }]}>
             <Text style={{ fontSize: t.font.sm, color: t.danger }}>{error}</Text>

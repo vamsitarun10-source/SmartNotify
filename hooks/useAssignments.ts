@@ -18,7 +18,7 @@ const service = {
   toggle: apiToggle,
 };
 
-export const useAssignments = createCrudHook<Assignment>(service, "cache_assignments");
+export const useAssignments = createCrudHook<Assignment>(service, "cache_assignments", "assignments");
 
 export function useUpcomingAssignments() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);

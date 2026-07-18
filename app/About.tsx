@@ -1,11 +1,13 @@
 import React from "react";
 import { View, Text, TouchableOpacity, ScrollView, Linking } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
 import { APP_NAME, APP_VERSION, APP_BUILD, DEVELOPER, SUPPORT_EMAIL, PLAY_STORE_URL } from "../constants/appInfo";
 import Header from "../components/Header";
 
 export default function AboutScreen() {
+  const insets = useSafeAreaInsets();
   const { theme: t } = useAppTheme();
 
   const items = [
@@ -19,7 +21,7 @@ export default function AboutScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: t.background }}>
       <Header title="About" showBack />
-      <ScrollView contentContainerStyle={{ padding: t.spacing.md }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ padding: t.spacing.md, paddingBottom: insets.bottom + 40 }} showsVerticalScrollIndicator={false}>
         {/* App Logo */}
         <View style={{ alignItems: "center", marginBottom: t.spacing.xl }}>
           <View style={{ width: 80, height: 80, borderRadius: 20, backgroundColor: t.primaryContainer, alignItems: "center", justifyContent: "center" }}>

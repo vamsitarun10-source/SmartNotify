@@ -18,7 +18,7 @@ api.interceptors.request.use(async (config) => {
         const token = decoded.split("::")[0];
         if (token) {
           const payload = JSON.parse(atob(token.split(".")[1]));
-          if (payload.exp * 1000 > Date.now()) {
+          if (!payload.exp || payload.exp * 1000 > Date.now()) {
             config.headers.Authorization = `Bearer ${token}`;
           }
         }

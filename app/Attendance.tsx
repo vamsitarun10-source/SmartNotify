@@ -2,10 +2,10 @@ import React from "react";
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   RefreshControl,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
 import { useAttendance } from "../hooks/useAttendance";
@@ -25,6 +25,7 @@ function getColorBg(pct: number, t: any): string {
 }
 
 export default function AttendanceScreen() {
+  const insets = useSafeAreaInsets();
   const { theme: t } = useAppTheme();
   const { summary, loading, error, refresh } = useAttendance();
 
@@ -40,7 +41,7 @@ export default function AttendanceScreen() {
       <Header title="Attendance" />
       <OfflineBanner />
       <ScrollView
-        contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 90 }}
+        contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 60 + insets.bottom + 16 }}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor={t.primary} />}
         showsVerticalScrollIndicator={false}
       >
@@ -160,8 +161,8 @@ function MetaItem({ icon, value, color, t }: { icon: string; value: number; colo
   );
 }
 
-const s = (t: any) => StyleSheet.create({
-  card: {
+const s = {
+  card: (t: any) => ({
     backgroundColor: t.card,
     borderRadius: t.radius.lg,
     borderWidth: 1,
@@ -169,28 +170,28 @@ const s = (t: any) => StyleSheet.create({
     padding: t.spacing.md,
     marginBottom: t.spacing.sm,
     ...t.shadow.sm,
-  },
-  circle: {
+  }),
+  circle: (t: any) => ({
     width: 64,
     height: 64,
     borderRadius: 32,
     borderWidth: 3,
     alignItems: "center",
     justifyContent: "center",
-  },
-  badge: {
+  }),
+  badge: (t: any) => ({
     borderRadius: t.radius.md,
     paddingHorizontal: t.spacing.md,
     paddingVertical: t.spacing.xs,
-  },
-  barBg: {
+  }),
+  barBg: (t: any) => ({
     height: 6,
     borderRadius: 3,
     backgroundColor: t.surfaceVariant,
     overflow: "hidden",
-  },
-  barFill: {
+  }),
+  barFill: (t: any) => ({
     height: "100%",
     borderRadius: 3,
-  },
-});
+  }),
+};

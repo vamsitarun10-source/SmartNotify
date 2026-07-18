@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
@@ -14,6 +15,7 @@ const CATEGORIES = [
 function todayStr() { return new Date().toISOString().slice(0, 10); }
 
 export default function AddCalendarEventScreen() {
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const route = useRoute<any>();
   const { create } = useCalendarEvents();
@@ -38,7 +40,7 @@ export default function AddCalendarEventScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: t.background }}>
       <Header title="Add Event" showBack />
-      <ScrollView contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 90 }}>
+      <ScrollView contentContainerStyle={{ padding: t.spacing.md, paddingBottom: insets.bottom + 40 }}>
         <Field label="Title"><TextInput style={input(t)} value={title} onChangeText={setTitle} placeholder="e.g. Holiday" placeholderTextColor={t.textTertiary} /></Field>
 
         <Field label="Category">

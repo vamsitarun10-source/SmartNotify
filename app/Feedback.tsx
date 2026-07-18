@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAppTheme } from "../constants/ThemeContext";
@@ -9,6 +10,7 @@ import Header from "../components/Header";
 const CATEGORIES = ["Bug Report", "Feature Request", "General Feedback", "Other"];
 
 export default function FeedbackScreen() {
+  const insets = useSafeAreaInsets();
   const { theme: t } = useAppTheme();
   const [category, setCategory] = useState("");
   const [message, setMessage] = useState("");
@@ -53,7 +55,7 @@ export default function FeedbackScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: t.background }}>
       <Header title="Feedback" showBack />
-      <ScrollView contentContainerStyle={{ padding: t.spacing.md }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ padding: t.spacing.md, paddingBottom: insets.bottom + 40 }} showsVerticalScrollIndicator={false}>
         <Text style={{ fontSize: t.font.lg, fontWeight: t.font.weight.bold, color: t.text, marginBottom: t.spacing.md }}>Send Feedback</Text>
 
         {/* Category */}

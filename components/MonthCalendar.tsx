@@ -53,9 +53,9 @@ export default function MonthCalendar({ selectedDate, onDateSelect, eventsByDate
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: t.card, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.cardBorder, ...t.shadow.sm }]}>
+    <View style={{ padding: t.spacing.md, marginBottom: t.spacing.md, backgroundColor: t.card, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.cardBorder, ...t.shadow.sm }}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: t.spacing.sm }}>
         <TouchableOpacity onPress={() => onDateSelect(prevMonth())} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
           <Ionicons name="chevron-back" size={22} color={t.primary} />
         </TouchableOpacity>
@@ -114,8 +114,6 @@ export default function MonthCalendar({ selectedDate, onDateSelect, eventsByDate
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 12, marginBottom: 16 },
-  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
   monthTitle: { letterSpacing: -0.3 },
   dayHeaderRow: { flexDirection: "row", marginBottom: 4 },
   dayHeaderCell: { flex: 1, alignItems: "center", paddingVertical: 4 },

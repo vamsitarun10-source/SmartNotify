@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, ScrollView, RefreshControl } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
 import { useStats } from "../hooks/useStats";
@@ -12,6 +13,7 @@ import OfflineBanner from "../components/OfflineBanner";
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function StatisticsScreen() {
+  const insets = useSafeAreaInsets();
   const { theme: t } = useAppTheme();
   const { stats, loading, error, refresh } = useStats();
 
@@ -20,7 +22,7 @@ export default function StatisticsScreen() {
       <Header title="Statistics" />
       <OfflineBanner />
       <ScrollView
-        contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 90 }}
+        contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 60 + insets.bottom + 16 }}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor={t.primary} />}
         showsVerticalScrollIndicator={false}
       >

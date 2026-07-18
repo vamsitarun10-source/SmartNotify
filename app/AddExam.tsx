@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
@@ -17,6 +18,7 @@ const EXAM_TYPES = [
 function todayStr(): string { return new Date().toISOString().slice(0, 10); }
 
 export default function AddExamScreen() {
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { create } = useExams();
   const { theme: t } = useAppTheme();
@@ -57,7 +59,7 @@ export default function AddExamScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: t.background }}>
       <Header title="Add Exam" showBack />
-      <ScrollView contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 90 }}>
+      <ScrollView contentContainerStyle={{ padding: t.spacing.md, paddingBottom: insets.bottom + 40 }}>
         <Field label="Title"><TextInput style={input(t)} value={title} onChangeText={setTitle} placeholder="e.g. Mid Term Examination" placeholderTextColor={t.textTertiary} /></Field>
         <Field label="Subject"><TextInput style={input(t)} value={subject} onChangeText={setSubject} placeholder="e.g. Math class" placeholderTextColor={t.textTertiary} /></Field>
 

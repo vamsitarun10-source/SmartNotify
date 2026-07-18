@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import {
-  View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator,
+  View, Text, TextInput, TouchableOpacity, ScrollView, Platform, ActivityIndicator, Keyboard, Alert,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
 import { useEvents } from "../hooks/useEvents";
+import { type ClassEvent } from "../services/events";
 import { useAuth } from "../hooks/useAuth";
 import { chat } from "../services/ai";
 import { scheduleClassNotification } from "../services/notifications";
@@ -45,7 +47,8 @@ function isToday(dateStr: string): boolean {
 
 export default function HomeScreen() {
   const navigation = useNavigation<any>();
-  const { events, refresh } = useEvents();
+  const insets = useSafeAreaInsets();
+  const { events, refresh, remove: removeEvent } = useEvents();
   const { user } = useAuth();
   const { theme: t } = useAppTheme();
   const { data: dashboard } = useDashboard();
@@ -57,11 +60,13 @@ export default function HomeScreen() {
   const isOnline = useOnlineStatus();
 
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [showReorder, setShowReorder] = useState(false);
   const msgId = useRef(0);
+  const scrollRef = useRef<ScrollView>(null);
   const chatRef = useRef<View>(null);
+  const inputRef = useRef<TextInput>(null);
+  const inputValueRef = useRef("");
 
   const todayEvents = useMemo(() => events.filter((e) => isToday(e.date)), [events]);
   const upcomingEvents = useMemo(
@@ -91,14 +96,54 @@ export default function HomeScreen() {
   }, [nextEvent]);
 
   const [markedIds, setMarkedIds] = useState<Set<string>>(new Set());
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", (e) => setKeyboardHeight(e.endCoordinates.height));
+    const hideSub = Keyboard.addListener("keyboardDidHide", () => setKeyboardHeight(0));
+    return () => { showSub.remove(); hideSub.remove(); };
+  }, []);
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
+    }
+  }, [messages.length]);
+
+  const handleDeleteEvent = async (event: ClassEvent) => {
+    Alert.alert("Delete Class", `Are you sure you want to delete "${event.title}"?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete", style: "destructive",
+        onPress: async () => {
+          if (!event.id || deletingId) return;
+          setDeletingId(event.id);
+          try {
+            if (!isOnline) {
+              await enqueueRequest("DELETE", `/events/${event.id}`, {});
+              refresh();
+              return;
+            }
+            await removeEvent(event.id);
+          } catch {
+            Alert.alert("Error", "Could not delete the class. Please try again.");
+          } finally {
+            setDeletingId(null);
+          }
+        },
+      },
+    ]);
+  };
+
   const handleMarkAttendance = async (eventId: string, attended: boolean) => {
     try { await markAttendance(eventId, attended); setMarkedIds((prev) => new Set(prev).add(eventId)); refresh(); } catch {}
   };
 
-  const sendMessage = async () => {
-    const text = input.trim();
+  const sendMessage = async (overrideText?: string) => {
+    const text = (overrideText ?? inputValueRef.current).trim();
     if (!text || sending) return;
-    setInput("");
+    inputRef.current?.clear();
     const userMsgId = String(++msgId.current);
     setMessages((prev) => [...prev, { id: userMsgId, role: "user", text }]);
     setSending(true);
@@ -123,7 +168,7 @@ export default function HomeScreen() {
   const quickActions = [
     { icon: "add-circle", label: "Add Class", color: t.primary, action: () => navigation.navigate("AddEvent") },
     { icon: "repeat", label: "Timetable", color: t.secondary, action: () => navigation.navigate("Timetable") },
-    { icon: "chatbubble-ellipses", label: "AI Chat", color: t.info, action: () => chatRef.current?.measure?.(() => {}) },
+    { icon: "chatbubble-ellipses", label: "AI Chat", color: t.info, action: () => chatRef.current?.measureInWindow((_x, y) => scrollRef.current?.scrollTo({ y: Math.max(0, y - 16), animated: true })) },
     { icon: "document-text", label: "Notes", color: t.warning, action: () => navigation.navigate("Notes") },
     { icon: "cloud-upload", label: "Backup", color: t.success, action: () => navigation.navigate("Backup") },
   ];
@@ -175,9 +220,9 @@ export default function HomeScreen() {
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.background }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <View style={{ flex: 1, backgroundColor: t.background }}>
       <OfflineBanner />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 90 }} showsVerticalScrollIndicator={false}>
+      <ScrollView ref={scrollRef} style={{ flex: 1 }} contentContainerStyle={{ paddingTop: insets.top + 12, paddingHorizontal: t.spacing.md, paddingBottom: 60 + insets.bottom + 16 + keyboardHeight }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         {/* Search Bar */}
         <TouchableOpacity
           style={{ flexDirection: "row", alignItems: "center", backgroundColor: t.surface, borderRadius: t.radius.lg, borderWidth: 1, borderColor: t.cardBorder, paddingHorizontal: t.spacing.md, paddingVertical: t.spacing.sm + 4, marginBottom: t.spacing.md, gap: t.spacing.sm, ...t.shadow.sm }}
@@ -231,7 +276,15 @@ export default function HomeScreen() {
                 <Text style={{ fontSize: t.font.xs, fontWeight: "700", color: t.primary }}>{todayEvents.length}</Text>
               </View>
             </View>
-            {todayEvents.map((e) => <EventCard key={e.id || e.title} event={e} />)}
+            {todayEvents.map((e) => (
+              <EventCard
+                key={e.id || e.title}
+                event={e}
+                showActions
+                onEdit={() => navigation.navigate("EditEvent" as never, { event: e } as never)}
+                onDelete={() => handleDeleteEvent(e)}
+              />
+            ))}
           </DashboardCard>
         )}
 
@@ -245,16 +298,26 @@ export default function HomeScreen() {
                   <Ionicons name="sparkles" size={24} color={t.primary} />
                   <Text style={{ color: t.textTertiary, fontSize: t.font.sm, marginTop: 6, textAlign: "center" }}>Try: "What is my next class?" or "How many assignments are pending?"</Text>
                 </View>
-              ) : messages.map((m) => <ChatBubble key={m.id} message={m.text} role={m.role} />)}
+              ) : messages.map((m) => {
+                const isUser = m.role === "user";
+                return (
+                  <View key={m.id} style={{ flexDirection: "row", marginVertical: 4, justifyContent: isUser ? "flex-end" : "flex-start" }}>
+                    <View style={{ maxWidth: "80%", paddingVertical: 10, paddingHorizontal: 16, borderRadius: 16, backgroundColor: isUser ? "#5C6BC0" : "#FFFFFF", borderWidth: isUser ? 0 : 1, borderColor: "#E2E8F0", borderBottomRightRadius: isUser ? 4 : 16, borderBottomLeftRadius: isUser ? 16 : 4 }}>
+                      <Text style={{ color: isUser ? "#FFFFFF" : "#1A1A2E", fontSize: 15, lineHeight: 22 }}>{m.text}</Text>
+                    </View>
+                  </View>
+                );
+              })}
               {sending ? <ActivityIndicator color={t.primary} style={{ marginTop: 8 }} /> : null}
             </View>
             <View style={{ flexDirection: "row", alignItems: "center", marginTop: t.spacing.sm }}>
               <TextInput
+                ref={inputRef}
                 style={{ flex: 1, backgroundColor: t.inputBg, borderWidth: 1, borderColor: t.inputBorder, borderRadius: t.radius.md, paddingHorizontal: t.spacing.md, paddingVertical: t.spacing.sm + 2, fontSize: t.font.md, color: t.text }}
-                placeholder="Ask me anything..." placeholderTextColor={t.textTertiary} value={input} onChangeText={setInput} onSubmitEditing={sendMessage} returnKeyType="send"
+                placeholder="Ask me anything..." placeholderTextColor={t.textTertiary} onChangeText={(text) => { inputValueRef.current = text; }} onSubmitEditing={(e) => { inputValueRef.current = e.nativeEvent.text; sendMessage(e.nativeEvent.text); }} returnKeyType="send"
                 accessibilityLabel="AI chat message"
               />
-              <TouchableOpacity style={{ marginLeft: t.spacing.sm, backgroundColor: t.primary, width: 44, height: 44, borderRadius: t.radius.md, alignItems: "center", justifyContent: "center" }} onPress={sendMessage} disabled={sending} activeOpacity={0.7} accessibilityLabel="Send message" accessibilityRole="button">
+              <TouchableOpacity style={{ marginLeft: t.spacing.sm, backgroundColor: t.primary, width: 44, height: 44, borderRadius: t.radius.md, alignItems: "center", justifyContent: "center" }} onPress={() => sendMessage()} disabled={sending} activeOpacity={0.7} accessibilityLabel="Send message" accessibilityRole="button">
                 <Ionicons name="send" size={20} color={t.onPrimary} />
               </TouchableOpacity>
             </View>
@@ -275,10 +338,11 @@ export default function HomeScreen() {
         onPress={() => navigation.navigate("AddEvent")}
         backgroundColor={t.primary}
         entranceDelay={800}
+        style={{ position: 'absolute', right: 16, bottom: 60 + insets.bottom + 16, zIndex: 100 }}
         accessibilityLabel="Add new class"
         accessibilityHint="Opens the add class form"
         accessibilityRole="button"
       />
-    </KeyboardAvoidingView>
+    </View>
   );
 }

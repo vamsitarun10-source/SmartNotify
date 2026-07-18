@@ -10,9 +10,12 @@ type Props = {
   backgroundColor?: string;
   style?: any;
   entranceDelay?: number;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
+  accessibilityRole?: string;
 };
 
-export default function AnimatedFAB({ onPress, icon = "add", color = "#fff", size = 28, backgroundColor = "#5C6BC0", style, entranceDelay = 0 }: Props) {
+export default function AnimatedFAB({ onPress, icon = "add", color = "#fff", size = 28, backgroundColor = "#5C6BC0", style, entranceDelay = 0, accessibilityLabel, accessibilityHint, accessibilityRole }: Props) {
   const scale = useRef(new Animated.Value(0)).current;
   const entranceY = useRef(new Animated.Value(30)).current;
 
@@ -35,7 +38,7 @@ export default function AnimatedFAB({ onPress, icon = "add", color = "#fff", siz
   };
 
   return (
-    <TouchableOpacity activeOpacity={0.8} onPress={onPress} onPressIn={onPressIn} onPressOut={onPressOut}>
+    <TouchableOpacity activeOpacity={0.8} onPress={onPress} onPressIn={onPressIn} onPressOut={onPressOut} style={style} accessibilityLabel={accessibilityLabel} accessibilityHint={accessibilityHint} accessibilityRole={accessibilityRole}>
       <Animated.View
         style={[
           {
@@ -46,7 +49,6 @@ export default function AnimatedFAB({ onPress, icon = "add", color = "#fff", siz
             shadowOpacity: 0.25, shadowRadius: 6,
             transform: [{ scale }, { translateY: entranceY }],
           },
-          style,
         ]}
       >
         <Ionicons name={icon as any} size={size} color={color} />

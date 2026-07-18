@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Animated } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
 import { useRewards } from "../hooks/useRewards";
@@ -49,6 +50,7 @@ function GoalProgress({ label, current, goal, unit, color, t }: { label: string;
 }
 
 export default function RewardsScreen() {
+  const insets = useSafeAreaInsets();
   const { theme: t } = useAppTheme();
   const { data, loading, refresh } = useRewards();
   const [showAllAchievements, setShowAllAchievements] = useState(false);
@@ -57,7 +59,7 @@ export default function RewardsScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: t.background }}>
         <Header title="Rewards" />
-        <ScrollView contentContainerStyle={{ padding: t.spacing.md }}>
+        <ScrollView contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 60 + insets.bottom + 16 }}>
           <SkeletonStatRow t={t} />
           <SkeletonList count={3} t={t} />
         </ScrollView>
@@ -76,7 +78,7 @@ export default function RewardsScreen() {
     <View style={{ flex: 1, backgroundColor: t.background }}>
       <Header title="Rewards" />
       <ScrollView
-        contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 90 }}
+        contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 60 + insets.bottom + 16 }}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor={t.primary} />}
         showsVerticalScrollIndicator={false}
       >

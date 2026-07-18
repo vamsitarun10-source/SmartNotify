@@ -18,7 +18,7 @@ const service = {
   toggle: apiToggle,
 };
 
-export const useExams = createCrudHook<Exam>(service, "cache_exams");
+export const useExams = createCrudHook<Exam>(service, "cache_exams", "exams");
 
 export function useUpcomingExams() {
   const [exams, setExams] = useState<Exam[]>([]);

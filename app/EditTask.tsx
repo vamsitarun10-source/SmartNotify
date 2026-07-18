@@ -9,6 +9,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
@@ -24,6 +25,7 @@ const CATEGORY_ICONS: Record<string, string> = {
 };
 
 export default function EditTaskScreen() {
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const route = useRoute<any>();
   const id = route.params?.id;
@@ -90,7 +92,7 @@ export default function EditTaskScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: t.background }}>
       <Header title="Edit Task" showBack />
-      <ScrollView contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 90 }}>
+      <ScrollView contentContainerStyle={{ padding: t.spacing.md, paddingBottom: insets.bottom + 40 }}>
         <Field label="Title"><TextInput style={input(t)} value={title} onChangeText={setTitle} /></Field>
         <Field label="Priority">
           <View style={{ flexDirection: "row", gap: t.spacing.sm }}>

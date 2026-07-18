@@ -9,6 +9,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
@@ -21,6 +22,7 @@ import AnimatedFAB from "../components/AnimatedFAB";
 
 export default function TimetableScreen() {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const { entries, loading, error, create, remove, generate } = useTimetable();
   const { refresh: refreshEvents } = useEvents();
   const { theme: t } = useAppTheme();
@@ -119,7 +121,7 @@ export default function TimetableScreen() {
 
   const s = StyleSheet.create({
     container: { flex: 1, backgroundColor: t.background },
-    content: { flex: 1, padding: t.spacing.md, paddingBottom: 90 },
+    content: { flex: 1, padding: t.spacing.md, paddingBottom: 60 + insets.bottom + 16 },
     form: {
       backgroundColor: t.card,
       borderRadius: t.radius.lg,
@@ -419,6 +421,7 @@ export default function TimetableScreen() {
         backgroundColor={t.primary}
         entranceDelay={400}
         icon={adding ? "close" : "add"}
+        style={{ position: 'absolute', right: 16, bottom: 60 + insets.bottom + 16, zIndex: 100 }}
       />
     </View>
   );

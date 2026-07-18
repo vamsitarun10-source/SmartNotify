@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Alert, RefreshControl } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
@@ -37,8 +38,9 @@ function todayStr() {
 
 export default function CalendarScreen() {
   const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
   const { theme: t } = useAppTheme();
-  const { events: classEvents, refresh: refreshEvents } = useEvents();
+  const { events: classEvents, refresh: refreshEvents, remove: removeClassEvent } = useEvents();
   const { assignments, refresh: refreshAssignments } = useAssignments();
   const { exams, refresh: refreshExams } = useExams();
   const { events: calEvents, refresh: refreshCal, remove: removeCal } = useCalendarEvents();
@@ -58,7 +60,7 @@ export default function CalendarScreen() {
     classEvents.forEach((e) => {
       if (!e.date) return;
       if (!map[e.date]) map[e.date] = [];
-      map[e.date].push({ title: e.title, category: "class", color: CATEGORIES[0].color, time: e.time });
+      map[e.date].push({ title: e.title, category: "class", color: CATEGORIES[0].color, time: e.time, id: e.id });
     });
 
     assignments.forEach((a) => {
@@ -85,6 +87,18 @@ export default function CalendarScreen() {
 
   const selectedItems = useMemo(() => eventsByDate[selectedDate] || [], [eventsByDate, selectedDate]);
 
+  const handleDeleteClass = (item: DayItem) => {
+    Alert.alert("Delete Class", `Are you sure you want to delete "${item.title}"?`, [
+      { text: "Cancel", style: "cancel" },
+      { text: "Delete", style: "destructive", onPress: async () => {
+        if (!item.id) return;
+        try {
+          await removeClassEvent(item.id);
+        } catch { Alert.alert("Error", "Could not delete the class. Please try again."); }
+      }},
+    ]);
+  };
+
   const handleDeleteOwn = (item: DayItem) => {
     Alert.alert("Delete", `Delete "${item.title}"?`, [
       { text: "Cancel", style: "cancel" },
@@ -97,7 +111,7 @@ export default function CalendarScreen() {
       <Header title="Calendar" showAdd onAdd={() => navigation.navigate("AddCalendarEvent")} />
       <OfflineBanner />
       <ScrollView
-        contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 90 }}
+        contentContainerStyle={{ padding: t.spacing.md, paddingBottom: 60 + insets.bottom + 16 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={t.primary} />}
         showsVerticalScrollIndicator={false}
       >
@@ -163,6 +177,10 @@ export default function CalendarScreen() {
                 <TouchableOpacity onPress={() => handleDeleteOwn(item)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                   <Ionicons name="trash-outline" size={18} color={t.danger} />
                 </TouchableOpacity>
+              ) : item.category === "class" && item.id ? (
+                <TouchableOpacity onPress={() => handleDeleteClass(item)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                  <Ionicons name="trash-outline" size={18} color={t.danger} />
+                </TouchableOpacity>
               ) : null}
             </View>
           ))
@@ -173,6 +191,7 @@ export default function CalendarScreen() {
         onPress={() => navigation.navigate("AddCalendarEvent")}
         backgroundColor={t.primary}
         entranceDelay={400}
+        style={{ position: 'absolute', right: 16, bottom: 60 + insets.bottom + 16, zIndex: 100 }}
         accessibilityLabel="Add event to calendar"
         accessibilityHint="Opens the add calendar event form"
         accessibilityRole="button"
