@@ -8,6 +8,8 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
 import { useNotes } from "../hooks/useNotes";
 import Header from "../components/Header";
+import AttachmentPicker from "../components/AttachmentPicker";
+import type { NoteAttachment } from "../services/notes";
 
 const NOTE_TYPES = [
   { key: "text", label: "Text", icon: "document-text" },
@@ -28,7 +30,7 @@ export default function EditNoteScreen() {
   const [content, setContent] = useState("");
   const [subject, setSubject] = useState("");
   const [noteType, setNoteType] = useState("text");
-  const [attachmentName, setAttachmentName] = useState("");
+  const [attachment, setAttachment] = useState<NoteAttachment | null>(null);
   const [pinned, setPinned] = useState(false);
   const [ready, setReady] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -39,7 +41,7 @@ export default function EditNoteScreen() {
       if (found) {
         setTitle(found.title); setContent(found.content); setSubject(found.subject);
         setNoteType(found.note_type); setPinned(found.pinned);
-        if (found.attachments.length > 0) setAttachmentName(found.attachments[0].filename);
+        if (found.attachments.length > 0) setAttachment(found.attachments[0]);
         setReady(true);
       }
     }
@@ -47,11 +49,10 @@ export default function EditNoteScreen() {
 
   const onSubmit = async () => {
     if (!title.trim()) { Alert.alert("Missing title", "Please enter a note title."); return; }
+    if (noteType !== "text" && !attachment) { Alert.alert("Missing attachment", "Please select an attachment."); return; }
     setSaving(true);
     try {
-      const attachments = noteType !== "text" && attachmentName.trim()
-        ? [{ filename: attachmentName.trim(), type: noteType }]
-        : [];
+      const attachments = attachment ? [attachment] : [];
       await update(id, {
         title: title.trim(), content, subject: subject.trim(),
         note_type: noteType, attachments, pinned,
@@ -78,7 +79,7 @@ export default function EditNoteScreen() {
               <TouchableOpacity
                 key={nt.key}
                 style={[typeBtn(t), noteType === nt.key && { backgroundColor: t.primary, borderColor: t.primary }]}
-                onPress={() => setNoteType(nt.key)}
+                onPress={() => { setNoteType(nt.key); setAttachment(null); }}
                 activeOpacity={0.7}
               >
                 <Ionicons name={nt.icon as any} size={18} color={noteType === nt.key ? "#fff" : t.textSecondary} />
@@ -97,14 +98,12 @@ export default function EditNoteScreen() {
             />
           </Field>
         ) : (
-          <Field label="Attachment filename">
-            <TextInput style={input(t)} value={attachmentName} onChangeText={setAttachmentName} />
-          </Field>
+          <AttachmentPicker noteType={noteType} attachment={attachment} onAttachmentChange={setAttachment} />
         )}
 
         <TouchableOpacity
           style={{ flexDirection: "row", alignItems: "center", gap: t.spacing.sm, marginBottom: t.spacing.md }}
-          onPress={() => setPinned(!pinned)}
+          onPress={() => { setPinned(!pinned); toggle(id); }}
           activeOpacity={0.7}
         >
           <Ionicons name={pinned ? "star" : "star-outline"} size={22} color={pinned ? t.warning : t.textTertiary} />

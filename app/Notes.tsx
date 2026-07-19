@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import {
-  View, Text, TextInput, TouchableOpacity, ScrollView, Alert, RefreshControl,
+  View, Text, TextInput, TouchableOpacity, ScrollView, Alert, RefreshControl, Image, Linking, Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -10,6 +10,7 @@ import { useNotes } from "../hooks/useNotes";
 import Header from "../components/Header";
 import OfflineBanner from "../components/OfflineBanner";
 import AnimatedFAB from "../components/AnimatedFAB";
+import type { Note, NoteAttachment } from "../services/notes";
 
 type NoteFilter = "all" | "pinned" | "text" | "image" | "pdf" | "voice";
 const FILTERS: { key: NoteFilter; label: string; icon: string }[] = [
@@ -36,6 +37,7 @@ export default function NotesScreen() {
   const { theme: t } = useAppTheme();
   const [typeFilter, setTypeFilter] = useState<NoteFilter>("all");
   const [search, setSearch] = useState(searchQuery);
+  const [imageViewer, setImageViewer] = useState<{ uri: string; title: string } | null>(null);
 
   const filtered = notes.filter((n) => {
     if (typeFilter === "pinned") return n.pinned;
@@ -51,6 +53,24 @@ export default function NotesScreen() {
   };
 
   const onSearch = () => doSearch(search, filterSubject || undefined);
+
+  const openAttachment = (note: Note, att: NoteAttachment) => {
+    if (!att.uri) return;
+    if (att.type === "image") {
+      setImageViewer({ uri: att.uri, title: note.title });
+    } else if (att.type === "pdf") {
+      Linking.openURL(att.uri).catch(() => Alert.alert("Error", "Could not open PDF."));
+    } else if (att.type === "voice") {
+      Linking.openURL(att.uri).catch(() => Alert.alert("Error", "Could not play audio."));
+    }
+  };
+
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return "";
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / 1048576).toFixed(1)} MB`;
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: t.background }}>
@@ -173,6 +193,35 @@ export default function NotesScreen() {
                       </View>
                     ) : null}
                   </View>
+                  {/* Attachment indicators */}
+                  {note.attachments.map((att, idx) => (
+                    <TouchableOpacity
+                      key={idx}
+                      style={{ flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: t.surfaceVariant, borderRadius: t.radius.md, padding: t.spacing.sm, marginTop: t.spacing.sm }}
+                      onPress={() => openAttachment(note, att)}
+                      activeOpacity={0.7}
+                    >
+                      {att.type === "image" ? (
+                        <>
+                          <Ionicons name="image" size={18} color={t.primary} />
+                          <Text style={{ fontSize: t.font.xs, color: t.textSecondary, flex: 1 }} numberOfLines={1}>🖼 {att.filename}</Text>
+                          {att.uri ? <Ionicons name="eye-outline" size={16} color={t.primary} /> : null}
+                        </>
+                      ) : att.type === "pdf" ? (
+                        <>
+                          <Ionicons name="document" size={18} color={t.danger} />
+                          <Text style={{ fontSize: t.font.xs, color: t.textSecondary, flex: 1 }} numberOfLines={1}>📄 {att.filename}{att.size ? ` (${formatFileSize(att.size)})` : ""}</Text>
+                          {att.uri ? <Ionicons name="open-outline" size={16} color={t.primary} /> : null}
+                        </>
+                      ) : att.type === "voice" ? (
+                        <>
+                          <Ionicons name="mic" size={18} color={t.primary} />
+                          <Text style={{ fontSize: t.font.xs, color: t.textSecondary, flex: 1 }} numberOfLines={1}>🎤 Voice Note{att.duration ? ` (${formatDuration(att.duration)})` : ""}</Text>
+                          {att.uri ? <Ionicons name="play-circle" size={16} color={t.primary} /> : null}
+                        </>
+                      ) : null}
+                    </TouchableOpacity>
+                  ))}
                 </View>
                 <TouchableOpacity onPress={() => onDelete(note)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                   <Ionicons name="trash-outline" size={18} color={t.danger} />
@@ -182,6 +231,17 @@ export default function NotesScreen() {
           ))
         )}
       </ScrollView>
+
+      {/* Image viewer overlay */}
+      {imageViewer ? (
+        <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.95)", zIndex: 1000, justifyContent: "center", alignItems: "center" }}>
+          <TouchableOpacity style={{ position: "absolute", top: 60, right: 20, zIndex: 1001 }} onPress={() => setImageViewer(null)} hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
+            <Ionicons name="close" size={28} color="#fff" />
+          </TouchableOpacity>
+          <Text style={{ position: "absolute", top: 60, left: 20, color: "#fff", fontSize: 16, fontWeight: "600" }} numberOfLines={1}>{imageViewer.title}</Text>
+          <Image source={{ uri: imageViewer.uri }} style={{ width: "90%", height: "70%", borderRadius: 12 }} resizeMode="contain" />
+        </View>
+      ) : null}
 
       <AnimatedFAB
         onPress={() => navigation.navigate("AddNote")}
@@ -194,6 +254,12 @@ export default function NotesScreen() {
       />
     </View>
   );
+}
+
+function formatDuration(secs: number): string {
+  const m = String(Math.floor(secs / 60)).padStart(2, "0");
+  const s = String(secs % 60).padStart(2, "0");
+  return `${m}:${s}`;
 }
 
 const chip = (t: any) => ({ paddingHorizontal: 12, paddingVertical: 6, borderRadius: t.radius.full, borderWidth: 1, borderColor: t.border, backgroundColor: t.surface });

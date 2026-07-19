@@ -3,7 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity, ScrollView, Platform, ActivityIndicator, Keyboard, Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
 import { useEvents } from "../hooks/useEvents";
@@ -110,6 +110,19 @@ export default function HomeScreen() {
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
     }
   }, [messages.length]);
+
+  const route = useRoute<any>();
+  useEffect(() => {
+    if (route.params?.searchQuery) {
+      inputValueRef.current = route.params.searchQuery;
+      inputRef.current?.setNativeProps?.({ text: route.params.searchQuery });
+      setTimeout(() => {
+        scrollRef.current?.scrollToEnd({ animated: true });
+        inputRef.current?.focus();
+      }, 400);
+      navigation.setParams({ searchQuery: undefined });
+    }
+  }, [route.params?.searchQuery]);
 
   const handleDeleteEvent = async (event: ClassEvent) => {
     Alert.alert("Delete Class", `Are you sure you want to delete "${event.title}"?`, [

@@ -10,6 +10,7 @@ export interface ClassEvent {
   location?: string;
   notes?: string;
   attended?: boolean | null;
+  duration_minutes?: number | null;
 }
 
 export async function listEvents(): Promise<ClassEvent[]> {

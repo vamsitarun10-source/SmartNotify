@@ -3,6 +3,10 @@ import api from "./api";
 export interface NoteAttachment {
   filename: string;
   type: string;
+  uri?: string;
+  mimeType?: string;
+  size?: number;
+  duration?: number;
 }
 
 export interface Note {

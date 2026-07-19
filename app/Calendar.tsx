@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Alert, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
 import { useEvents } from "../hooks/useEvents";
 import { useAssignments } from "../hooks/useAssignments";
 import { useExams } from "../hooks/useExams";
 import { useCalendarEvents } from "../hooks/useCalendar";
-import { deleteCalendarEvent } from "../services/calendar";
 import MonthCalendar from "../components/MonthCalendar";
 import Header from "../components/Header";
 import OfflineBanner from "../components/OfflineBanner";
@@ -47,6 +46,21 @@ export default function CalendarScreen() {
 
   const [selectedDate, setSelectedDate] = useState(todayStr());
   const [refreshing, setRefreshing] = useState(false);
+
+  const route = useRoute<any>();
+  useFocusEffect(
+    useCallback(() => {
+      const params = route.params as Record<string, any> | undefined;
+      if (params?.selectedDate) {
+        setSelectedDate(params.selectedDate);
+        navigation.setParams({ selectedDate: undefined, eventId: undefined });
+      }
+      refreshEvents();
+      refreshAssignments();
+      refreshExams();
+      refreshCal();
+    }, [route.params, navigation, refreshEvents, refreshAssignments, refreshExams, refreshCal])
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);
