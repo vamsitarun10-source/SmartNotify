@@ -4,6 +4,7 @@ import {
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { launchImageLibrary } from "react-native-image-picker";
+import { pick } from "@react-native-documents/picker";
 import { useAppTheme } from "../constants/ThemeContext";
 import type { NoteAttachment } from "../services/notes";
 
@@ -40,6 +41,28 @@ export default function AttachmentPicker({ noteType, attachment, onAttachmentCha
     } catch (e: any) {
       setPicking(false);
       Alert.alert("Error", e?.message || "Failed to pick image.");
+    }
+  };
+
+  const pickPdf = async () => {
+    try {
+      setPicking(true);
+      const result = await pick({ type: ["application/pdf"] });
+      setPicking(false);
+      if (!result || result.length === 0) return;
+      const file = result[0];
+      onAttachmentChange({
+        filename: file.name || "document.pdf",
+        type: "pdf",
+        uri: file.uri,
+        mimeType: file.type || "application/pdf",
+        size: file.size || 0,
+        duration: 0,
+      });
+    } catch (e: any) {
+      setPicking(false);
+      if (e?.code === "DOCUMENT_PICKER_CANCELED") return;
+      Alert.alert("Error", "Could not select PDF. Please try again.");
     }
   };
 
@@ -95,30 +118,22 @@ export default function AttachmentPicker({ noteType, attachment, onAttachmentCha
               </View>
             </View>
             <View style={{ flexDirection: "row", gap: t.spacing.sm }}>
-              <TouchableOpacity style={[smBtn(t), { backgroundColor: t.primary }]} onPress={removeAttachment} activeOpacity={0.7}>
+              <TouchableOpacity style={[smBtn(t), { backgroundColor: t.primary }]} onPress={pickPdf} activeOpacity={0.7}>
+                <Ionicons name="document" size={16} color="#fff" />
+                <Text style={smBtnText(t)}>Choose Another</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[smBtn(t), { backgroundColor: t.danger }]} onPress={removeAttachment} activeOpacity={0.7}>
                 <Ionicons name="trash-outline" size={16} color="#fff" />
                 <Text style={smBtnText(t)}>Remove</Text>
               </TouchableOpacity>
             </View>
           </View>
         ) : (
-          <View style={{ alignItems: "center", gap: t.spacing.sm, paddingVertical: 24, borderRadius: t.radius.lg, borderWidth: 2, borderColor: t.border, borderStyle: "dashed", backgroundColor: t.surfaceVariant }}>
-            <Ionicons name="document" size={32} color={t.textTertiary} />
-            <Text style={{ fontSize: t.font.sm, color: t.textSecondary, textAlign: "center" }}>PDF file picker is not available on this build.{'\n'}Enter a filename below:</Text>
-          </View>
+          <TouchableOpacity style={pickerBtn(t)} onPress={pickPdf} disabled={picking} activeOpacity={0.7}>
+            {picking ? <ActivityIndicator color={t.danger} /> : <Ionicons name="document" size={32} color={t.danger} />}
+            <Text style={pickerBtnText(t)}>{picking ? "Opening document picker..." : "Tap to select a PDF file"}</Text>
+          </TouchableOpacity>
         )}
-      </View>
-    );
-  }
-
-  if (noteType === "voice") {
-    return (
-      <View style={{ marginBottom: 14 }}>
-        <Text style={{ fontSize: 13, fontWeight: "600", color: "#64748B", marginBottom: 6 }}>Voice Note</Text>
-        <View style={{ alignItems: "center", gap: t.spacing.sm, paddingVertical: 24, borderRadius: t.radius.lg, borderWidth: 2, borderColor: t.border, borderStyle: "dashed", backgroundColor: t.surfaceVariant }}>
-          <Ionicons name="mic" size={32} color={t.textTertiary} />
-          <Text style={{ fontSize: t.font.sm, color: t.textSecondary, textAlign: "center" }}>Voice recording is not available on this build.{'\n'}Enter a filename below:</Text>
-        </View>
       </View>
     );
   }

@@ -9,6 +9,7 @@ export const SEARCH_CATEGORIES = [
 ];
 
 export const SCREEN_SHORTCUTS = [
+  { key: "Calendar", icon: "calendar", color: "#5C6BC0", screen: "Calendar" },
   { key: "Attendance", icon: "stats-chart", color: "#5C6BC0", screen: "Attendance" },
   { key: "Statistics", icon: "bar-chart", color: "#26A69A", screen: "Statistics" },
   { key: "Rewards", icon: "trophy", color: "#FFA726", screen: "Rewards" },

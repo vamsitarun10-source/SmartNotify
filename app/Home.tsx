@@ -244,7 +244,6 @@ export default function HomeScreen() {
         >
           <Ionicons name="search" size={18} color={t.textTertiary} />
           <Text style={{ fontSize: t.font.md, color: t.textTertiary, flex: 1 }}>Search everything...</Text>
-          <Ionicons name="mic" size={18} color={t.textTertiary} />
         </TouchableOpacity>
 
         {/* Reorder Toggle */}

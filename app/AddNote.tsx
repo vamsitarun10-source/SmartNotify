@@ -15,7 +15,6 @@ const NOTE_TYPES = [
   { key: "text", label: "Text", icon: "document-text" },
   { key: "image", label: "Image", icon: "image" },
   { key: "pdf", label: "PDF", icon: "document" },
-  { key: "voice", label: "Voice", icon: "mic" },
 ];
 
 export default function AddNoteScreen() {
