@@ -61,7 +61,7 @@ notifee.onBackgroundEvent(async ({ type, detail }) => {
             const decoded = decodeURIComponent(atob(raw));
             const token = decoded.split("::")[0];
             if (token) {
-              await fetch(`${__DEV__ ? "http://10.0.2.2:8000" : "https://api.classreminder.app"}/events/${originalId}/attendance`, {
+              await fetch(`https://smartnotify-backend.onrender.com/events/${originalId}/attendance`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify({ attended: true }),
@@ -82,7 +82,7 @@ notifee.onBackgroundEvent(async ({ type, detail }) => {
             const decoded = decodeURIComponent(atob(raw));
             const token = decoded.split("::")[0];
             if (token) {
-              await fetch(`${__DEV__ ? "http://10.0.2.2:8000" : "https://api.classreminder.app"}/events/${originalId}/attendance`, {
+              await fetch(`https://smartnotify-backend.onrender.com/events/${originalId}/attendance`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify({ attended: false }),

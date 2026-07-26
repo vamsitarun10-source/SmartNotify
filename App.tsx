@@ -15,6 +15,7 @@ import { useOnlineStatus } from "./hooks/useOnlineStatus";
 import { processQueue } from "./services/syncQueue";
 import api from "./services/api";
 import OnboardingScreen, { isOnboardingComplete } from "./app/OnboardingScreen";
+import HeartbeatService from "./services/HeartbeatService";
 
 // Eager imports — React.lazy() is unreliable in React Native release builds
 import Login from "./app/Login";
@@ -138,6 +139,16 @@ function AppContent() {
     }
     wasOffline.current = !isOnline;
   }, [isOnline]);
+
+  // Heartbeat service — keeps backend responsive while user is logged in
+  useEffect(() => {
+    if (isAuthenticated) {
+      HeartbeatService.getInstance().start();
+    } else {
+      HeartbeatService.getInstance().stop();
+    }
+    return () => HeartbeatService.getInstance().stop();
+  }, [isAuthenticated]);
 
   if (onboardingDone === null || isAuthenticated === null) {
     return (
