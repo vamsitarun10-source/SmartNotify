@@ -293,15 +293,24 @@ Please follow the existing code style and add tests for new features.
 
 ---
 
+## Repository
+
+GitHub Repository: https://github.com/vamsitarun10-source/SmartNotify
+
+---
+
 ## Author
 
 **Vamsi Krishna**
 
-Electronics and Communication Engineering Student  
-AI & Full Stack Developer
+Electronics and Communication Engineering (ECE) Student
 
-- GitHub: [github.com/vamsitarun10-source](https://github.com/vamsitarun10-source)
-- LinkedIn: [linkedin.com/in/vamsi-krishna-073b012ba](https://linkedin.com/in/vamsi-krishna-073b012ba)
+Aspiring AI Engineer | Full-Stack Developer | Mobile App Developer
+
+Passionate about Artificial Intelligence, Mobile App Development, Backend Development, and building real-world software solutions.
+
+- GitHub: https://github.com/vamsitarun10-source
+- LinkedIn: https://www.linkedin.com/in/vamsi-krishna-09360038b/
 
 ---
 
