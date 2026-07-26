@@ -21,14 +21,6 @@ interface SearchableData {
   calendarEvents: CalendarEvent[];
 }
 
-function highlight(text: string, query: string): string {
-  if (!query) return text;
-  const lower = text.toLowerCase();
-  const idx = lower.indexOf(query.toLowerCase());
-  if (idx === -1) return text;
-  return text.slice(0, idx) + "<<" + text.slice(idx, idx + query.length) + ">>" + text.slice(idx + query.length);
-}
-
 function matchScore(text: string, query: string): number {
   const lower = text.toLowerCase();
   const q = query.toLowerCase();

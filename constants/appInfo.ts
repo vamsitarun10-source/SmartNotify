@@ -7,7 +7,6 @@ export const APP_PACKAGE = "com.classreminder";
 export const DEVELOPER = "SmartNotify";
 export const SUPPORT_EMAIL = "support@classreminder.app";
 export const WEBSITE = "https://classreminder.app";
-export const PLAY_STORE_URL = `https://play.google.com/store/apps/details?id=${APP_PACKAGE}`;
 
 export const PRIVACY_POLICY = `
 CLASSREMINDER PRIVACY POLICY

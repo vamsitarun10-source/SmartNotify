@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, StyleSheet } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAppTheme } from "../constants/ThemeContext";
-import { SUPPORT_EMAIL } from "../constants/appInfo";
 import Header from "../components/Header";
 
 const CATEGORIES = ["Bug Report", "Feature Request", "General Feedback", "Other"];

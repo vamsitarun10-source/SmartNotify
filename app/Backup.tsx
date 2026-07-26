@@ -38,16 +38,11 @@ export default function BackupScreen() {
   const onExport = async () => {
     try {
       const { blob, filename } = await exportData();
-      const reader = new FileReader();
-      reader.onload = async () => {
-        try {
-          await Share.share({
-            message: reader.result as string,
-            title: filename,
-          });
-        } catch {}
-      };
-      reader.readAsText(blob);
+      const text = await blob.text();
+      await Share.share({
+        message: text,
+        title: filename,
+      });
       loadCounts();
     } catch (e: any) {
       Alert.alert("Export failed", e?.message || "Try again.");

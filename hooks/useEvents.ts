@@ -9,7 +9,6 @@ import {
 import {
   scheduleClassNotification,
   cancelNotificationForEvent,
-  cancelAllNotifications,
 } from "../services/notifications";
 
 export function useEvents() {

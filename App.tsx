@@ -11,13 +11,10 @@ import { useAuth, AuthProvider } from "./hooks/useAuth";
 import { requestNotificationPermission, setupNotificationListeners } from "./services/notifications";
 import ErrorBoundary from "./components/ErrorBoundary";
 import SyncStatus from "./components/SyncStatus";
-import RateAppDialog from "./components/RateAppDialog";
-import WhatsNewDialog from "./components/WhatsNewDialog";
 import { useOnlineStatus } from "./hooks/useOnlineStatus";
 import { processQueue } from "./services/syncQueue";
 import api from "./services/api";
 import OnboardingScreen, { isOnboardingComplete } from "./app/OnboardingScreen";
-import { incrementLaunchCount } from "./components/RateAppDialog";
 
 // Eager imports — React.lazy() is unreliable in React Native release builds
 import Login from "./app/Login";
@@ -125,7 +122,6 @@ function AppContent() {
   const wasOffline = useRef(false);
 
   useEffect(() => {
-    incrementLaunchCount();
     isOnboardingComplete().then(setOnboardingDone);
     requestNotificationPermission();
     setupNotificationListeners();
@@ -161,8 +157,6 @@ function AppContent() {
     <SafeAreaProvider>
       <StatusBar barStyle={t.mode === "light" ? "dark-content" : "light-content"} backgroundColor={t.background} />
       <SyncStatus />
-      <RateAppDialog />
-      <WhatsNewDialog />
       <NavigationContainer>
         <Stack.Navigator
           screenOptions={{

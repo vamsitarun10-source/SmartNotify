@@ -1,5 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Platform } from "react-native";
 
 const ENCRYPTION_KEY = "classreminder_enc_key_v1";
 

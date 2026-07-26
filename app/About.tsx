@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, Linking } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useAppTheme } from "../constants/ThemeContext";
-import { APP_NAME, APP_VERSION, APP_BUILD, DEVELOPER, SUPPORT_EMAIL, PLAY_STORE_URL } from "../constants/appInfo";
+import { APP_NAME, APP_VERSION, APP_BUILD, DEVELOPER, SUPPORT_EMAIL } from "../constants/appInfo";
 import Header from "../components/Header";
 
 export default function AboutScreen() {
@@ -14,7 +14,6 @@ export default function AboutScreen() {
     { icon: "information-circle", label: "Version", value: `${APP_VERSION} (${APP_BUILD})` },
     { icon: "person", label: "Developer", value: DEVELOPER },
     { icon: "mail", label: "Support", value: SUPPORT_EMAIL, onPress: () => Linking.openURL(`mailto:${SUPPORT_EMAIL}`) },
-    { icon: "star", label: "Rate Us", value: "Rate on Play Store", onPress: () => Linking.openURL(PLAY_STORE_URL) },
     { icon: "shield-checkmark", label: "Privacy Policy", value: "View policy", onPress: () => (global as any).__navigation?.navigate("PrivacyPolicy") },
   ];
 

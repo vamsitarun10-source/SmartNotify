@@ -13,7 +13,6 @@ import { chat } from "../services/ai";
 import { scheduleClassNotification } from "../services/notifications";
 import { markAttendance } from "../services/events";
 import { useTodayTasks } from "../hooks/useTasks";
-import { toggleTask } from "../services/tasks";
 import { useUpcomingAssignments } from "../hooks/useAssignments";
 import { useUpcomingExams } from "../hooks/useExams";
 import { useDashboard } from "../hooks/useDashboard";
@@ -21,7 +20,6 @@ import { useWidgetOrder } from "../hooks/useWidgetOrder";
 import { useRewards } from "../hooks/useRewards";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { enqueueRequest } from "../services/syncQueue";
-import ChatBubble from "../components/ChatBubble";
 import EventCard from "../components/EventCard";
 import DashboardCard from "../components/DashboardCard";
 import OfflineBanner from "../components/OfflineBanner";
@@ -185,14 +183,6 @@ export default function HomeScreen() {
     { icon: "document-text", label: "Notes", color: t.warning, action: () => navigation.navigate("Notes") },
     { icon: "cloud-upload", label: "Backup", color: t.success, action: () => navigation.navigate("Backup") },
   ];
-
-  const WIDGET_LABELS: Record<string, string> = {
-    welcome: "Welcome & Clock", nextClass: "Next Class", quickActions: "Quick Actions",
-    attendance: "Weekly Attendance", productivity: "Weekly Productivity",
-    aiSuggestions: "AI Suggestions", exams: "This Week's Exams", assignments: "Upcoming Assignments",
-    freeTime: "Free Time Today", studyHours: "Study Hours", recentNotes: "Recent Notes",
-    attendanceCheck: "Attendance Check", rewards: "Rewards",
-  };
 
   const renderWidget = (key: string, delay: number) => {
     switch (key) {
