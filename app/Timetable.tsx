@@ -20,6 +20,20 @@ import Header from "../components/Header";
 import OfflineBanner from "../components/OfflineBanner";
 import AnimatedFAB from "../components/AnimatedFAB";
 
+function Field({ label, children, fieldStyle, labelStyle }: {
+  label: string;
+  children: React.ReactNode;
+  fieldStyle: any;
+  labelStyle: any;
+}) {
+  return (
+    <View style={fieldStyle}>
+      <Text style={labelStyle}>{label}</Text>
+      {children}
+    </View>
+  );
+}
+
 export default function TimetableScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
@@ -252,13 +266,6 @@ export default function TimetableScreen() {
     },
   });
 
-  const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <View style={s.field}>
-      <Text style={s.label}>{label}</Text>
-      {children}
-    </View>
-  );
-
   return (
     <View style={s.container}>
       <Header title="Timetable" />
@@ -267,7 +274,7 @@ export default function TimetableScreen() {
         {adding && (
           <View style={s.form}>
             <Text style={s.formTitle}>Add recurring class</Text>
-            <Field label="Class name">
+            <Field fieldStyle={s.field} labelStyle={s.label} label="Class name">
               <TextInput
                 style={s.input}
                 value={title}
@@ -276,7 +283,7 @@ export default function TimetableScreen() {
                 placeholderTextColor={t.textTertiary}
               />
             </Field>
-            <Field label="Subject">
+            <Field fieldStyle={s.field} labelStyle={s.label} label="Subject">
               <TextInput
                 style={s.input}
                 value={subject}
@@ -285,7 +292,7 @@ export default function TimetableScreen() {
                 placeholderTextColor={t.textTertiary}
               />
             </Field>
-            <Field label="Day of week">
+            <Field fieldStyle={s.field} labelStyle={s.label} label="Day of week">
               <View style={s.dayRow}>
                 {DAY_NAMES.map((d, i) => (
                   <TouchableOpacity
@@ -300,7 +307,7 @@ export default function TimetableScreen() {
                 ))}
               </View>
             </Field>
-            <Field label="Time (HH:MM)">
+            <Field fieldStyle={s.field} labelStyle={s.label} label="Time (HH:MM)">
               <TextInput
                 style={s.input}
                 value={time}
@@ -309,7 +316,7 @@ export default function TimetableScreen() {
                 placeholderTextColor={t.textTertiary}
               />
             </Field>
-            <Field label="Remind before (minutes)">
+            <Field fieldStyle={s.field} labelStyle={s.label} label="Remind before (minutes)">
               <TextInput
                 style={s.input}
                 value={reminderBefore}
@@ -318,7 +325,7 @@ export default function TimetableScreen() {
                 placeholderTextColor={t.textTertiary}
               />
             </Field>
-            <Field label="Location">
+            <Field fieldStyle={s.field} labelStyle={s.label} label="Location">
               <TextInput
                 style={s.input}
                 value={location}
@@ -327,7 +334,7 @@ export default function TimetableScreen() {
                 placeholderTextColor={t.textTertiary}
               />
             </Field>
-            <Field label="Notes">
+            <Field fieldStyle={s.field} labelStyle={s.label} label="Notes">
               <TextInput
                 style={[s.input, s.multiline]}
                 value={notes}

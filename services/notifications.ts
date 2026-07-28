@@ -1,16 +1,25 @@
-import notifee, { EventType, AndroidImportance, AndroidVisibility } from "@notifee/react-native";
+import notifee, { EventType, AndroidImportance, AndroidVisibility, AlarmType, TriggerType } from "@notifee/react-native";
 import type { Notification, NotificationTriggerInput } from "@notifee/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Platform } from "react-native";
 import { markAttendance } from "./events";
 import api from "./api";
+import { debugLogger } from "./DebugLogger";
+
+const DEBUG = __DEV__;
+
+function dlog(msg: string) {
+  if (DEBUG) console.log("[NOTIF]", msg);
+  debugLogger.log(msg);
+}
 
 const SETTINGS_KEY = "app_settings";
 
 // --- Channel IDs ---
-const CHANNEL_ID = "classes";
-const TASK_CHANNEL_ID = "tasks";
-const ASSIGNMENT_CHANNEL_ID = "assignments";
-const EXAM_CHANNEL_ID = "exams";
+const CHANNEL_ID = "classes_v2";
+const TASK_CHANNEL_ID = "tasks_v2";
+const ASSIGNMENT_CHANNEL_ID = "assignments_v2";
+const EXAM_CHANNEL_ID = "exams_v2";
 
 // --- Notification Map Keys ---
 const NOTIFICATION_MAP_KEY = "notification_map";
@@ -31,13 +40,13 @@ async function ensureChannels() {
   const settings = await getSettings();
   const vibration = settings.vibration !== false;
   const sound = settings.alarmSound || "default";
-  const soundUri = sound === "silent" ? undefined : sound === "gentle" ? "default" : "default";
-  const vibClass = vibration ? [0, 250, 250, 250] : undefined;
-  const vibTask = vibration ? [0, 150, 100, 150] : undefined;
-  const vibExam = vibration ? [0, 300, 200, 300, 200, 300] : undefined;
+  const soundUri = sound === "silent" ? undefined : "default";
+  const vibClass = vibration ? [200, 300, 200, 300] : undefined;
+  const vibTask = vibration ? [200, 200, 100, 200] : undefined;
+  const vibExam = vibration ? [200, 400, 200, 400, 200, 400] : undefined;
 
-  try {
-    await notifee.createChannel({
+  const channels = [
+    {
       id: CHANNEL_ID,
       name: "Class reminders",
       importance: AndroidImportance.HIGH,
@@ -46,26 +55,26 @@ async function ensureChannels() {
       sound: soundUri,
       lights: true,
       visibility: AndroidVisibility.PUBLIC,
-    });
-    await notifee.createChannel({
+    },
+    {
       id: TASK_CHANNEL_ID,
       name: "Task reminders",
-      importance: AndroidImportance.DEFAULT,
+      importance: AndroidImportance.HIGH,
       vibration,
       vibrationPattern: vibTask,
       sound: soundUri,
       visibility: AndroidVisibility.PUBLIC,
-    });
-    await notifee.createChannel({
+    },
+    {
       id: ASSIGNMENT_CHANNEL_ID,
       name: "Assignment reminders",
-      importance: AndroidImportance.DEFAULT,
+      importance: AndroidImportance.HIGH,
       vibration,
       vibrationPattern: vibTask,
       sound: soundUri,
       visibility: AndroidVisibility.PUBLIC,
-    });
-    await notifee.createChannel({
+    },
+    {
       id: EXAM_CHANNEL_ID,
       name: "Exam reminders",
       importance: AndroidImportance.HIGH,
@@ -74,8 +83,17 @@ async function ensureChannels() {
       sound: soundUri,
       lights: true,
       visibility: AndroidVisibility.PUBLIC,
-    });
-  } catch (e) {}
+    },
+  ];
+
+  for (const channel of channels) {
+    try {
+      const existing = await notifee.getChannel(channel.id);
+      if (!existing) {
+        await notifee.createChannel(channel);
+      }
+    } catch {}
+  }
 }
 
 export async function requestNotificationPermission() {
@@ -110,7 +128,6 @@ function buildAndroidConfig(channelId: string, actions: any[], fullScreen = fals
     config.vibrationPattern = channelId === EXAM_CHANNEL_ID
       ? [0, 300, 200, 300, 200, 300]
       : [0, 250, 250, 250];
-    config.lights = true;
   } else {
     config.vibrationPattern = [0, 150, 100, 150];
   }
@@ -167,7 +184,7 @@ export async function snoozeNotification(notificationId: string, snoozeMinutes: 
         body: notif.body || "",
         android: buildAndroidConfig(channelId, actions, notifType === "class" || notifType === "exam", data),
       },
-      { type: "timestamp", timestamp: snoozeTime }
+      { type: TriggerType.TIMESTAMP, timestamp: snoozeTime }
     );
   } catch (e) {}
 }
@@ -187,34 +204,99 @@ export async function scheduleClassNotification(
   time: string,
   reminderBefore: number
 ): Promise<string | null> {
+  dlog(`scheduleClassNotification entered: ${JSON.stringify({ eventId, title, date, time, reminderBefore })}`);
+  console.log("[FLOW] scheduleClassNotification entered", { eventId, title, date, time, reminderBefore });
+
+  if (!eventId) {
+    dlog("FAIL: empty eventId");
+    console.log("[FLOW] FAIL: empty eventId");
+    return null;
+  }
+
   const eventDate = new Date(date + "T" + time + ":00");
   const reminderDate = new Date(eventDate.getTime() - reminderBefore * 60000);
-  if (reminderDate.getTime() <= Date.now()) return null;
+  const now = Date.now();
+
+  dlog(`eventDate: ${eventDate.toISOString()} | reminderDate: ${reminderDate.toISOString()} | now: ${new Date(now).toISOString()}`);
+  console.log("[FLOW] times", { eventDate: eventDate.toISOString(), reminderDate: reminderDate.toISOString(), now: new Date(now).toISOString(), now_ts: now });
+
+  // If the event itself is in the past, don't schedule
+  if (eventDate.getTime() <= now) {
+    dlog("SKIP: event is in the past");
+    console.log("[FLOW] SKIP: event is in the past");
+    return null;
+  }
+
+  // If the reminder time has passed but event is still upcoming, fire as soon as possible
+  const triggerTimestamp = reminderDate.getTime() <= now ? now + 1000 : reminderDate.getTime();
+  dlog(`triggerTimestamp: ${new Date(triggerTimestamp).toISOString()}`);
+  console.log("[FLOW] triggerTimestamp", { ts: triggerTimestamp, iso: new Date(triggerTimestamp).toISOString(), method: reminderDate.getTime() <= now ? 'immediate(now+1s)' : 'scheduled(reminder)' });
 
   // Dedup: check if notification already exists for this event
   const map = await getMap(NOTIFICATION_MAP_KEY);
   if (map[eventId]) {
+    dlog("cancelling existing notification for event");
     try {
       await notifee.cancelNotification(map[eventId]);
-    } catch {}
+    } catch (cancelErr) {
+      dlog(`cancel existing notification error (non-fatal): ${cancelErr}`);
+    }
     delete map[eventId];
   }
 
   const data = { type: "class", original_id: eventId, title, date, time, reminder_before: reminderBefore };
 
-  const notificationId = await notifee.createTriggerNotification(
-    {
-      id: eventId,
-      title: "SmartNotify",
-      body: `${title} starts in ${reminderBefore} min`,
-      android: buildAndroidConfig(CHANNEL_ID, [DISMISS_ACTION, SNOOZE_5_ACTION, ATTENDED_ACTION], true, data),
-    },
-    { type: "timestamp", timestamp: reminderDate.getTime() }
-  );
+  try {
+    // If notification is due within 15 seconds, show immediately via displayNotification
+    if (triggerTimestamp <= Date.now() + 15000) {
+      dlog("trigger is immediate — using displayNotification instead of createTriggerNotification");
+      console.log("[FLOW] using displayNotification (immediate)");
+      const notificationId = await notifee.displayNotification({
+        id: eventId,
+        title: "SmartNotify",
+        body: `${title} starts in ${reminderBefore} min`,
+        android: buildAndroidConfig(CHANNEL_ID, [DISMISS_ACTION, SNOOZE_5_ACTION, ATTENDED_ACTION], true, data),
+      });
+      dlog(`displayNotification SUCCESS, id: ${notificationId}`);
+      console.log("[FLOW] displayNotification success", { notificationId });
+      map[eventId] = notificationId;
+      await saveMap(NOTIFICATION_MAP_KEY, map);
+      return notificationId;
+    }
 
-  map[eventId] = notificationId;
-  await saveMap(NOTIFICATION_MAP_KEY, map);
-  return notificationId;
+    // Use AlarmManager for all trigger notifications to avoid WorkManager's 15-min minimum
+    console.log("[FLOW] using createTriggerNotification with AlarmManager", { triggerTimestamp, iso: new Date(triggerTimestamp).toISOString() });
+    const notificationId = await notifee.createTriggerNotification(
+      {
+        id: eventId,
+        title: "SmartNotify",
+        body: `${title} starts in ${reminderBefore} min`,
+        android: buildAndroidConfig(CHANNEL_ID, [DISMISS_ACTION, SNOOZE_5_ACTION, ATTENDED_ACTION], true, data),
+      },
+      {
+        type: TriggerType.TIMESTAMP,
+        timestamp: triggerTimestamp,
+        alarmManager: { type: AlarmType.SET_AND_ALLOW_WHILE_IDLE },
+      }
+    );
+
+    dlog(`createTriggerNotification SUCCESS (AlarmManager), id: ${notificationId}`);
+    console.log("[FLOW] createTriggerNotification success", { notificationId });
+
+    // Immediately list all scheduled notifications
+    const scheduled = await notifee.getTriggerNotificationIds();
+    dlog(`Scheduled notification IDs after scheduling: ${JSON.stringify(scheduled)}`);
+    console.log("[FLOW] getTriggerNotificationIds after scheduling:", scheduled);
+
+    map[eventId] = notificationId;
+    await saveMap(NOTIFICATION_MAP_KEY, map);
+    console.log("[FLOW] scheduleClassNotification complete, returning", { notificationId });
+    return notificationId;
+  } catch (e) {
+    dlog(`createTriggerNotification FAILED: ${e}`);
+    console.log("[FLOW] createTriggerNotification FAILED:", String(e));
+    throw e;
+  }
 }
 
 export async function cancelNotificationForEvent(eventId: string) {
@@ -245,9 +327,13 @@ export async function scheduleTaskReminder(
   reminderMinutes: number
 ): Promise<string | null> {
   if (!dueDate || !dueTime || reminderMinutes <= 0) return null;
+  if (!taskId) return null;
   const dueDateTime = new Date(dueDate + "T" + dueTime + ":00");
+  if (dueDateTime.getTime() <= Date.now()) return null;
   const reminderDate = new Date(dueDateTime.getTime() - reminderMinutes * 60000);
-  if (reminderDate.getTime() <= Date.now()) return null;
+  const triggerTimestamp = reminderDate.getTime() <= Date.now()
+    ? Date.now() + 1000
+    : reminderDate.getTime();
 
   // Dedup: cancel existing notification for this task
   const taskMap = await getMap(TASK_NOTIFICATION_MAP_KEY);
@@ -265,7 +351,7 @@ export async function scheduleTaskReminder(
       body: `"${title}" is due in ${reminderMinutes} min`,
       android: buildAndroidConfig(TASK_CHANNEL_ID, [DISMISS_ACTION, SNOOZE_5_ACTION], false, data),
     },
-    { type: "timestamp", timestamp: reminderDate.getTime() }
+    { type: TriggerType.TIMESTAMP, timestamp: triggerTimestamp }
   );
 
   const map = await getMap(TASK_NOTIFICATION_MAP_KEY);
@@ -294,9 +380,13 @@ export async function scheduleAssignmentReminder(
   reminderMinutes: number
 ): Promise<string | null> {
   if (!dueDate || !dueTime || reminderMinutes <= 0) return null;
+  if (!assignmentId) return null;
   const dueDateTime = new Date(dueDate + "T" + dueTime + ":00");
+  if (dueDateTime.getTime() <= Date.now()) return null;
   const reminderDate = new Date(dueDateTime.getTime() - reminderMinutes * 60000);
-  if (reminderDate.getTime() <= Date.now()) return null;
+  const triggerTimestamp = reminderDate.getTime() <= Date.now()
+    ? Date.now() + 1000
+    : reminderDate.getTime();
 
   // Dedup: cancel existing notification for this assignment
   const assignMap = await getMap(ASSIGNMENT_NOTIFICATION_MAP_KEY);
@@ -314,7 +404,7 @@ export async function scheduleAssignmentReminder(
       body: `"${title}" is due in ${reminderMinutes} min`,
       android: buildAndroidConfig(ASSIGNMENT_CHANNEL_ID, [DISMISS_ACTION, SNOOZE_5_ACTION], false, data),
     },
-    { type: "timestamp", timestamp: reminderDate.getTime() }
+    { type: TriggerType.TIMESTAMP, timestamp: triggerTimestamp }
   );
 
   const map = await getMap(ASSIGNMENT_NOTIFICATION_MAP_KEY);
@@ -343,9 +433,13 @@ export async function scheduleExamReminder(
   reminderMinutes: number
 ): Promise<string | null> {
   if (!date || !time || reminderMinutes <= 0) return null;
+  if (!examId) return null;
   const examDateTime = new Date(date + "T" + time + ":00");
+  if (examDateTime.getTime() <= Date.now()) return null;
   const reminderDate = new Date(examDateTime.getTime() - reminderMinutes * 60000);
-  if (reminderDate.getTime() <= Date.now()) return null;
+  const triggerTimestamp = reminderDate.getTime() <= Date.now()
+    ? Date.now() + 1000
+    : reminderDate.getTime();
 
   // Dedup: cancel existing notification for this exam
   const examMap = await getMap(EXAM_NOTIFICATION_MAP_KEY);
@@ -363,7 +457,7 @@ export async function scheduleExamReminder(
       body: `"${title}" starts in ${reminderMinutes} min`,
       android: buildAndroidConfig(EXAM_CHANNEL_ID, [DISMISS_ACTION, SNOOZE_5_ACTION, ATTENDED_ACTION], true, data),
     },
-    { type: "timestamp", timestamp: reminderDate.getTime() }
+    { type: TriggerType.TIMESTAMP, timestamp: triggerTimestamp }
   );
 
   const map = await getMap(EXAM_NOTIFICATION_MAP_KEY);
@@ -488,4 +582,72 @@ async function handleDismiss(notificationId: string) {
       }
     }
   }
+}
+
+// ===========================================
+// DEBUG NOTIFICATION TESTING
+// ===========================================
+export async function testImmediateNotification(): Promise<string | null> {
+  try {
+    dlog("testImmediateNotification called");
+    const notifId = await notifee.displayNotification({
+      title: "Test Notification",
+      body: "This is an immediate test notification. If you see this, Notifee displayNotification works.",
+      android: {
+        channelId: CHANNEL_ID,
+        smallIcon: "ic_launcher",
+        pressAction: { id: "default" },
+      },
+    });
+    dlog(`testImmediateNotification SUCCESS, id: ${notifId}`);
+    return notifId;
+  } catch (e) {
+    dlog(`testImmediateNotification FAILED: ${e}`);
+    throw e;
+  }
+}
+
+export async function testScheduledNotification(): Promise<string | null> {
+  try {
+    const triggerTime = Date.now() + 120000; // 2 minutes
+    dlog(`testScheduledNotification, trigger in 120s at: ${new Date(triggerTime).toISOString()}`);
+    const notifId = await notifee.createTriggerNotification(
+      {
+        title: "Debug Notification",
+        body: "This notification was scheduled 2 minutes ago. Scheduling works!",
+        android: {
+          channelId: CHANNEL_ID,
+          smallIcon: "ic_launcher",
+          pressAction: { id: "default" },
+          sound: "default",
+        },
+      },
+      {
+        type: TriggerType.TIMESTAMP,
+        timestamp: triggerTime,
+        alarmManager: { type: AlarmType.SET_AND_ALLOW_WHILE_IDLE },
+      }
+    );
+    dlog(`testScheduledNotification SUCCESS (AlarmManager), id: ${notifId}`);
+
+    const scheduled = await notifee.getTriggerNotificationIds();
+    dlog(`Scheduled notification IDs after test: ${JSON.stringify(scheduled)}`);
+
+    return notifId;
+  } catch (e) {
+    dlog(`testScheduledNotification FAILED: ${e}`);
+    throw e;
+  }
+}
+
+export async function listScheduledNotifications(): Promise<string[]> {
+  const ids = await notifee.getTriggerNotificationIds();
+  dlog(`All scheduled notification IDs: ${JSON.stringify(ids)}`);
+  return ids;
+}
+
+export async function checkNotificationPermissions(): Promise<Record<string, any>> {
+  const settings = await notifee.getNotificationSettings();
+  dlog(`Notification settings: ${JSON.stringify(settings)}`);
+  return settings;
 }

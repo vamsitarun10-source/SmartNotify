@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -22,6 +22,20 @@ const TIME_RE = /^\d{2}:\d{2}$/;
 
 function todayStr(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+function Field({ label, children, fieldStyle, labelStyle }: {
+  label: string;
+  children: React.ReactNode;
+  fieldStyle: any;
+  labelStyle: any;
+}) {
+  return (
+    <View style={fieldStyle}>
+      <Text style={labelStyle}>{label}</Text>
+      {children}
+    </View>
+  );
 }
 
 export default function AddEventScreen() {
@@ -59,7 +73,8 @@ export default function AddEventScreen() {
     }
     setSaving(true);
     try {
-      await create({
+      console.log("[FLOW] AddEvent.onSubmit: calling create()", { title: title.trim(), date, time, reminder_before: mins });
+      const created = await create({
         title: title.trim(),
         subject: subject || undefined,
         date,
@@ -68,6 +83,7 @@ export default function AddEventScreen() {
         location: location || undefined,
         notes: notes || undefined,
       });
+      console.log("[FLOW] AddEvent.onSubmit: create() returned", { id: created?.id, title: created?.title });
       navigation.goBack();
     } catch (e: any) {
       Alert.alert("Save failed", e?.message || "Could not save event.");
@@ -117,13 +133,6 @@ export default function AddEventScreen() {
     },
   });
 
-  const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <View style={s.field}>
-      <Text style={s.label}>{label}</Text>
-      {children}
-    </View>
-  );
-
   return (
     <KeyboardAvoidingView
       style={s.container}
@@ -131,7 +140,7 @@ export default function AddEventScreen() {
     >
       <Header title="Add class" showBack />
       <ScrollView style={s.content}>
-        <Field label="Title">
+        <Field label="Title" fieldStyle={s.field} labelStyle={s.label}>
           <TextInput
             style={s.input}
             value={title}
@@ -140,7 +149,7 @@ export default function AddEventScreen() {
             placeholderTextColor={t.textTertiary}
           />
         </Field>
-        <Field label="Subject">
+        <Field label="Subject" fieldStyle={s.field} labelStyle={s.label}>
           <TextInput
             style={s.input}
             value={subject}
@@ -149,7 +158,7 @@ export default function AddEventScreen() {
             placeholderTextColor={t.textTertiary}
           />
         </Field>
-        <Field label="Date (YYYY-MM-DD)">
+        <Field label="Date (YYYY-MM-DD)" fieldStyle={s.field} labelStyle={s.label}>
           <TextInput
             style={s.input}
             value={date}
@@ -158,7 +167,7 @@ export default function AddEventScreen() {
             placeholderTextColor={t.textTertiary}
           />
         </Field>
-        <Field label="Time (HH:MM)">
+        <Field label="Time (HH:MM)" fieldStyle={s.field} labelStyle={s.label}>
           <TextInput
             style={s.input}
             value={time}
@@ -167,7 +176,7 @@ export default function AddEventScreen() {
             placeholderTextColor={t.textTertiary}
           />
         </Field>
-        <Field label="Remind before (minutes)">
+        <Field label="Remind before (minutes)" fieldStyle={s.field} labelStyle={s.label}>
           <TextInput
             style={s.input}
             value={reminderBefore}
@@ -176,7 +185,7 @@ export default function AddEventScreen() {
             placeholderTextColor={t.textTertiary}
           />
         </Field>
-        <Field label="Location">
+        <Field label="Location" fieldStyle={s.field} labelStyle={s.label}>
           <TextInput
             style={s.input}
             value={location}
@@ -185,7 +194,7 @@ export default function AddEventScreen() {
             placeholderTextColor={t.textTertiary}
           />
         </Field>
-        <Field label="Notes">
+        <Field label="Notes" fieldStyle={s.field} labelStyle={s.label}>
           <TextInput
             style={[s.input, s.multiline]}
             value={notes}

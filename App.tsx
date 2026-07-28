@@ -48,6 +48,7 @@ import Rewards from "./app/Rewards";
 import PrivacyPolicy from "./app/PrivacyPolicy";
 import About from "./app/About";
 import Feedback from "./app/Feedback";
+import DebugConsole from "./app/DebugConsole";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -202,6 +203,7 @@ function AppContent() {
               <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} options={{ animation: "slide_from_right" }} />
               <Stack.Screen name="About" component={About} options={{ animation: "slide_from_right" }} />
               <Stack.Screen name="Feedback" component={Feedback} options={{ animation: "slide_from_right" }} />
+              {__DEV__ && <Stack.Screen name="DebugConsole" component={DebugConsole} options={{ animation: "slide_from_bottom" }} />}
             </>
           )}
         </Stack.Navigator>

@@ -34,33 +34,39 @@ export function useEvents() {
   }, [refresh]);
 
   const create = useCallback(async (payload: ClassEvent) => {
+    console.log("[FLOW] useEvents.create: calling apiCreate", { title: payload.title, date: payload.date, time: payload.time, reminder_before: payload.reminder_before });
     const created = await apiCreate(payload);
-    try {
-      await scheduleClassNotification(
-        created.id || "",
-        created.title,
-        created.date,
-        created.time,
-        created.reminder_before
-      );
-    } catch {}
+    console.log("[FLOW] useEvents.create: apiCreate returned", { id: created?.id, title: created?.title, date: created?.date, time: created?.time, reminder_before: created?.reminder_before });
+    
+    console.log("[FLOW] useEvents.create: about to call scheduleClassNotification", { eventId: created.id, title: created.title, date: created.date, time: created.time, reminderBefore: created.reminder_before });
+    const notifPromise = scheduleClassNotification(
+      created.id || "",
+      created.title,
+      created.date,
+      created.time,
+      created.reminder_before
+    );
+    console.log("[FLOW] useEvents.create: scheduleClassNotification called (fire-and-forget)");
+    notifPromise.then(
+      (result) => console.log("[FLOW] useEvents.create: scheduleClassNotification resolved", { result }),
+      (err) => console.log("[FLOW] useEvents.create: scheduleClassNotification rejected", { err: String(err) })
+    );
+    
     setEvents((prev) => [created, ...prev]);
     return created;
   }, []);
 
   const update = useCallback(async (id: string, payload: Partial<ClassEvent>) => {
-    try { await cancelNotificationForEvent(id); } catch {}
+    await cancelNotificationForEvent(id);
     const updated = await apiUpdate(id, payload);
     if (updated.id) {
-      try {
-        await scheduleClassNotification(
-          updated.id,
-          updated.title,
-          updated.date,
-          updated.time,
-          updated.reminder_before
-        );
-      } catch {}
+      scheduleClassNotification(
+        updated.id,
+        updated.title,
+        updated.date,
+        updated.time,
+        updated.reminder_before
+      );
     }
     setEvents((prev) =>
       prev.map((e) => (e.id === id ? { ...e, ...updated } : e))

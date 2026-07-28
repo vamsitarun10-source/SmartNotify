@@ -21,11 +21,25 @@ import Header from "../components/Header";
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^\d{2}:\d{2}$/;
 
+function Field({ label, children, fieldStyle, labelStyle }: {
+  label: string;
+  children: React.ReactNode;
+  fieldStyle: any;
+  labelStyle: any;
+}) {
+  return (
+    <View style={fieldStyle}>
+      <Text style={labelStyle}>{label}</Text>
+      {children}
+    </View>
+  );
+}
+
 export default function EditEventScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const route = useRoute<any>();
-  const id = route.params?.id;
+  const id = route.params?.id || route.params?.event?.id;
   const { events, update, loading } = useEvents();
   const { theme: t } = useAppTheme();
 
@@ -135,13 +149,6 @@ export default function EditEventScreen() {
     },
   });
 
-  const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <View style={s.field}>
-      <Text style={s.label}>{label}</Text>
-      {children}
-    </View>
-  );
-
   if (!ready) {
     return (
       <View style={s.container}>
@@ -160,7 +167,7 @@ export default function EditEventScreen() {
     >
       <Header title="Edit class" showBack />
       <ScrollView style={s.content}>
-        <Field label="Title">
+        <Field label="Title" fieldStyle={s.field} labelStyle={s.label}>
           <TextInput
             style={s.input}
             value={title}
@@ -168,7 +175,7 @@ export default function EditEventScreen() {
             placeholderTextColor={t.textTertiary}
           />
         </Field>
-        <Field label="Subject">
+        <Field label="Subject" fieldStyle={s.field} labelStyle={s.label}>
           <TextInput
             style={s.input}
             value={subject}
@@ -176,7 +183,7 @@ export default function EditEventScreen() {
             placeholderTextColor={t.textTertiary}
           />
         </Field>
-        <Field label="Date (YYYY-MM-DD)">
+        <Field label="Date (YYYY-MM-DD)" fieldStyle={s.field} labelStyle={s.label}>
           <TextInput
             style={s.input}
             value={date}
@@ -185,7 +192,7 @@ export default function EditEventScreen() {
             placeholderTextColor={t.textTertiary}
           />
         </Field>
-        <Field label="Time (HH:MM)">
+        <Field label="Time (HH:MM)" fieldStyle={s.field} labelStyle={s.label}>
           <TextInput
             style={s.input}
             value={time}
@@ -194,7 +201,7 @@ export default function EditEventScreen() {
             placeholderTextColor={t.textTertiary}
           />
         </Field>
-        <Field label="Remind before (minutes)">
+        <Field label="Remind before (minutes)" fieldStyle={s.field} labelStyle={s.label}>
           <TextInput
             style={s.input}
             value={reminderBefore}
@@ -203,7 +210,7 @@ export default function EditEventScreen() {
             placeholderTextColor={t.textTertiary}
           />
         </Field>
-        <Field label="Location">
+        <Field label="Location" fieldStyle={s.field} labelStyle={s.label}>
           <TextInput
             style={s.input}
             value={location}
@@ -212,7 +219,7 @@ export default function EditEventScreen() {
             placeholderTextColor={t.textTertiary}
           />
         </Field>
-        <Field label="Notes">
+        <Field label="Notes" fieldStyle={s.field} labelStyle={s.label}>
           <TextInput
             style={[s.input, s.multiline]}
             value={notes}
